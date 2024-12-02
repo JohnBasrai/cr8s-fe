@@ -3,9 +3,9 @@ use std::rc::Rc;
 use gloo_storage::{SessionStorage, Storage};
 use yew::platform::spawn_local;
 use yew::prelude::*;
-use yew::{UseReducerHandle, Reducible};
+use yew::{Reducible, UseReducerHandle};
 
-use crate::api::user::{User, MeResponse, LoginResponse, api_me};
+use crate::api::user::{api_me, LoginResponse, MeResponse, User};
 
 pub type CurrentUserContext = UseReducerHandle<CurrentUser>;
 
@@ -29,18 +29,20 @@ impl Reducible for CurrentUser {
                     user: Some(User {
                         id: me_resp.id,
                         username: me_resp.username,
-                        created_at: me_resp.created_at
+                        created_at: me_resp.created_at,
                     }),
-                    token: Some(login_resp.token)
-                }.into()
-            },
+                    token: Some(login_resp.token),
+                }
+                .into()
+            }
             CurrentUserActions::LoginFail => {
                 SessionStorage::clear();
                 Self {
                     user: None,
-                    token: None
-                }.into()
-            },
+                    token: None,
+                }
+                .into()
+            }
         }
     }
 }
@@ -48,14 +50,13 @@ impl Reducible for CurrentUser {
 pub struct CurrentUserDispatchActions {
     pub action_type: CurrentUserActions,
     pub login_response: Option<LoginResponse>,
-    pub me_response: Option<MeResponse>
+    pub me_response: Option<MeResponse>,
 }
 
 pub enum CurrentUserActions {
     LoginSuccess,
     LoginFail,
 }
-
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -67,7 +68,7 @@ pub fn curent_user_provider(props: &Props) -> Html {
     let user = use_reducer(CurrentUser::default);
 
     if user.user.is_none() {
-        if let Ok(token) = SessionStorage::get::<String>("cr8s_token")  {
+        if let Ok(token) = SessionStorage::get::<String>("cr8s_token") {
             let cloned_user = user.clone();
             spawn_local(async move {
                 match api_me(&token).await {

@@ -13,7 +13,7 @@ pub struct Crate {
     pub code: String,
     pub version: String,
     pub description: Option<String>,
-    pub created_at: String
+    pub created_at: String,
 }
 
 pub async fn api_crate_show(token: &String, id: i32) -> Result<Crate, Error> {
@@ -35,12 +35,12 @@ pub async fn api_crates(token: &String) -> Result<Vec<Crate>, Error> {
 }
 
 pub async fn api_crate_create(
-    token: &String, 
-    name: String, 
+    token: &String,
+    name: String,
     code: String,
     rustacean_id: i32,
     version: String,
-    description: String
+    description: String,
 ) -> Result<Crate, Error> {
     let response = Request::post(&format!("{}/crates", APP_HOST))
         .header("Authorization", &format!("Bearer {}", token))
@@ -61,11 +61,11 @@ pub async fn api_crate_create(
 pub async fn api_crate_update(
     token: &String,
     id: i32,
-    name: String, 
+    name: String,
     code: String,
     rustacean_id: i32,
     version: String,
-    description: String
+    description: String,
 ) -> Result<Crate, Error> {
     let response = Request::put(&format!("{}/crates/{}", APP_HOST, id))
         .header("Authorization", &format!("Bearer {}", token))

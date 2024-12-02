@@ -11,15 +11,15 @@ pub struct Props {
 pub fn button(props: &Props) -> Html {
     let classes = classes!("btn", format!("btn-{}", props.button_type));
     match props.onclick.clone() {
-        Some(callback) => html! { 
+        Some(callback) => html! {
             <button type="submit" class={classes} onclick={callback}>
                 {props.label.clone()}
             </button>
         },
-        None => html! { 
+        None => html! {
             <button type="submit" class={classes}>
                 {props.label.clone()}
             </button>
-        }
+        },
     }
 }

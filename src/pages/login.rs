@@ -1,20 +1,21 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::Route;
 use crate::components::login_form::LoginForm;
 use crate::contexts::CurrentUserContext;
+use crate::Route;
 
 #[function_component(Login)]
 pub fn login() -> Html {
-    let current_user_ctx = use_context::<CurrentUserContext>().expect("Current user context is missing");
+    let current_user_ctx =
+        use_context::<CurrentUserContext>().expect("Current user context is missing");
 
     match &current_user_ctx.user {
         Some(_) => {
             html! {
                 <Redirect<Route> to={Route::Home} />
             }
-        },
+        }
         None => {
             html! {
                 <div class="container">

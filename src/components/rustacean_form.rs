@@ -1,23 +1,24 @@
 use web_sys::HtmlInputElement;
-use yew::{prelude::*, platform::spawn_local};
+use yew::{platform::spawn_local, prelude::*};
 use yew_router::prelude::*;
 
-use crate::Route;
-use crate::api::rustaceans::{api_rustacean_create, Rustacean, api_rustacean_update};
+use crate::api::rustaceans::{api_rustacean_create, api_rustacean_update, Rustacean};
 use crate::components::alert::Alert;
 use crate::components::button::Button;
 use crate::components::input::Input;
 use crate::contexts::CurrentUserContext;
+use crate::Route;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub rustacean: Option<Rustacean>
+    pub rustacean: Option<Rustacean>,
 }
 
 #[function_component(RustaceanForm)]
 pub fn rustacean_form(props: &Props) -> Html {
     let navigator = use_navigator().expect("Navigator not available");
-    let current_user_ctx = use_context::<CurrentUserContext>().expect("Current user context is missing");
+    let current_user_ctx =
+        use_context::<CurrentUserContext>().expect("Current user context is missing");
 
     let name_handle = use_state(|| {
         if let Some(r) = &props.rustacean {
@@ -68,27 +69,20 @@ pub fn rustacean_form(props: &Props) -> Html {
                 let token = token.clone();
                 spawn_local(async move {
                     if let Some(rustacean) = rustacean_ {
-                        match api_rustacean_update(
-                            &token, 
-                            rustacean.id.clone(), 
-                            name_,
-                            email_,
-                        ).await {
+                        match api_rustacean_update(&token, rustacean.id.clone(), name_, email_)
+                            .await
+                        {
                             Ok(_) => navigator_.push(&Route::Rustaceans),
                             Err(e) => error_handle_.set(e.to_string()),
                         }
                     } else {
-                        match api_rustacean_create(
-                            &token, 
-                            name_,
-                            email_,
-                        ).await {
+                        match api_rustacean_create(&token, name_, email_).await {
                             Ok(_) => navigator_.push(&Route::Rustaceans),
                             Err(e) => error_handle_.set(e.to_string()),
                         }
                     }
                 });
-            },
+            }
             None => error_handle_.set("Session expired. Please login again".to_string()),
         }
     });
@@ -116,7 +110,7 @@ pub fn rustacean_form(props: &Props) -> Html {
                     onchange={email_changed}
                 />
             </div>
-            <Button button_type="primary" label="Save" />  
+            <Button button_type="primary" label="Save" />
         </form>
     }
 }

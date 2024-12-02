@@ -1,8 +1,8 @@
 use yew::prelude::*;
-use yew::suspense::{SuspensionResult, Suspension};
+use yew::suspense::{Suspension, SuspensionResult};
 
-use crate::api::crates::{Crate, api_crates, api_crate_show};
-use crate::api::rustaceans::{Rustacean, api_rustaceans, api_rustacean_show};
+use crate::api::crates::{api_crate_show, api_crates, Crate};
+use crate::api::rustaceans::{api_rustacean_show, api_rustaceans, Rustacean};
 
 #[hook]
 pub fn use_rustaceans(token: &str) -> SuspensionResult<Vec<Rustacean>> {

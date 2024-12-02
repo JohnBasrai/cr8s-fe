@@ -6,7 +6,7 @@ pub struct Props {
     pub options: Vec<(AttrValue, AttrValue)>,
     pub name: AttrValue,
     pub value: AttrValue,
-    pub onchange: Callback<Event>
+    pub onchange: Callback<Event>,
 }
 
 #[function_component(Select)]

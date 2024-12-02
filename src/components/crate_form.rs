@@ -1,15 +1,15 @@
 use web_sys::{HtmlInputElement, HtmlSelectElement, HtmlTextAreaElement};
-use yew::{prelude::*, platform::spawn_local};
+use yew::{platform::spawn_local, prelude::*};
 use yew_router::prelude::*;
 
-use crate::Route;
-use crate::api::crates::{Crate, api_crate_create, api_crate_update};
+use crate::api::crates::{api_crate_create, api_crate_update, Crate};
 use crate::api::rustaceans::Rustacean;
 use crate::components::alert::Alert;
 use crate::components::input::Input;
 use crate::components::select::Select;
 use crate::components::textarea::Textarea;
 use crate::contexts::CurrentUserContext;
+use crate::Route;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -20,7 +20,8 @@ pub struct Props {
 #[function_component(CrateForm)]
 pub fn crate_form(props: &Props) -> Html {
     let navigator = use_navigator().expect("Navigator not available");
-    let current_user_ctx = use_context::<CurrentUserContext>().expect("Current user context is missing");
+    let current_user_ctx =
+        use_context::<CurrentUserContext>().expect("Current user context is missing");
 
     let name_handle = use_state(|| {
         if let Some(c) = &props.cr8 {
@@ -97,6 +98,8 @@ pub fn crate_form(props: &Props) -> Html {
         }
     });
 
+    // The undscore names are cloned values to moving into the blocks below.
+    //
     let name_ = name.clone();
     let code_ = code.clone();
     let version_ = version.clone();
@@ -110,7 +113,6 @@ pub fn crate_form(props: &Props) -> Html {
         let code_ = code_.clone();
         let crate_ = crate_.clone();
         let version_ = version_.clone();
-        let rustacean_id_ = rustacean_id_.clone();
         let description_ = description_.clone();
         let error_handle_ = error_message_handle.clone();
         let navigator_ = navigator.clone();
@@ -123,26 +125,30 @@ pub fn crate_form(props: &Props) -> Html {
                     Ok(rustacean_id) => spawn_local(async move {
                         if let Some(cr8) = crate_ {
                             match api_crate_update(
-                                &token, 
-                                cr8.id.clone(), 
+                                &token,
+                                cr8.id.clone(),
                                 name_,
                                 code_,
                                 rustacean_id,
                                 version_,
-                                description_
-                            ).await {
+                                description_,
+                            )
+                            .await
+                            {
                                 Ok(_) => navigator_.push(&Route::Crates),
                                 Err(e) => error_handle_.set(e.to_string()),
                             }
                         } else {
                             match api_crate_create(
-                                &token, 
-                                name_, 
+                                &token,
+                                name_,
                                 code_,
                                 rustacean_id,
                                 version_,
-                                description_
-                            ).await {
+                                description_,
+                            )
+                            .await
+                            {
                                 Ok(_) => navigator_.push(&Route::Crates),
                                 Err(e) => error_handle_.set(e.to_string()),
                             }
@@ -150,14 +156,20 @@ pub fn crate_form(props: &Props) -> Html {
                     }),
                     Err(_) => error_handle_.set("Cannot parse rustacean ID".to_string()),
                 }
-            },
+            }
             None => error_handle_.set("Session expired. Please login again".to_string()),
         }
     });
 
-    let options = props.authors
+    let options = props
+        .authors
         .iter()
-        .map(|r| (AttrValue::from(r.id.to_string()), AttrValue::from(r.name.clone())))
+        .map(|r| {
+            (
+                AttrValue::from(r.id.to_string()),
+                AttrValue::from(r.name.clone()),
+            )
+        })
         .collect::<Vec<(AttrValue, AttrValue)>>();
     html! {
         <form onsubmit={onsubmit}>

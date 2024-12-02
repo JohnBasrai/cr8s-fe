@@ -2,13 +2,12 @@ use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::Route;
 use crate::api::rustaceans::api_rustacean_delete;
 use crate::components::alert::Alert;
 use crate::components::header::Header;
 use crate::components::sidebar::Sidebar;
 use crate::contexts::CurrentUserContext;
-
+use crate::Route;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -18,7 +17,8 @@ pub struct Props {
 #[function_component(RustaceansDelete)]
 pub fn rustaceans_delete(props: &Props) -> Html {
     let navigator = use_navigator().expect("Navigator not available");
-    let current_user_ctx = use_context::<CurrentUserContext>().expect("Current user context is missing");
+    let current_user_ctx =
+        use_context::<CurrentUserContext>().expect("Current user context is missing");
 
     let error_message_handle = use_state(String::default);
     let error_message = (*error_message_handle).clone();
@@ -38,7 +38,7 @@ pub fn rustaceans_delete(props: &Props) -> Html {
                     match api_rustacean_delete(&token, rustacean_id).await {
                         Ok(()) => navigator.push(&Route::Rustaceans),
                         Err(e) => error_message_handle.set(e.to_string()),
-                    } 
+                    }
                 });
             });
             html! {
@@ -61,10 +61,9 @@ pub fn rustaceans_delete(props: &Props) -> Html {
                     </div>
                 </div>
             }
-        },
+        }
         None => html! {
             <Redirect<Route> to={Route::Login} />
-        }
+        },
     }
 }
-

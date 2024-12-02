@@ -1,5 +1,5 @@
-use gloo_net::Error;
 use gloo_net::http::Request;
+use gloo_net::Error;
 use serde::Deserialize;
 use serde_json::json;
 

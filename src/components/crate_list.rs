@@ -1,7 +1,7 @@
+use crate::hooks::use_crates;
+use crate::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::Route;
-use crate::hooks::use_crates;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -42,15 +42,15 @@ pub fn crate_list(props: &Props) -> HtmlResult {
                                 <td>{a_crate.version}</td>
                                 <td>{a_crate.description}</td>
                                 <td>
-                                    <Link<Route> 
-                                        to={Route::CratesEdit { id: a_crate.id }} 
+                                    <Link<Route>
+                                        to={Route::CratesEdit { id: a_crate.id }}
                                         classes="link-secondary"
                                     >
                                         {"edit"}
                                     </Link<Route>>
                                     <span class="mx-1">{"/"}</span>
                                     <Link<Route>
-                                        to={Route::CratesDelete { id: a_crate.id }} 
+                                        to={Route::CratesDelete { id: a_crate.id }}
                                         classes="link-danger"
                                     >
                                         {"delete"}

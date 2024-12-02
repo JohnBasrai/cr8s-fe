@@ -1,7 +1,7 @@
+use crate::hooks::use_rustaceans;
+use crate::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::Route;
-use crate::hooks::use_rustaceans;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -37,15 +37,15 @@ pub fn rustacean_list(props: &Props) -> HtmlResult {
                                 <td>{rustacean.email}</td>
                                 <td>{rustacean.created_at}</td>
                                 <td>
-                                    <Link<Route> 
-                                        to={Route::RustaceansEdit { id: rustacean.id }} 
+                                    <Link<Route>
+                                        to={Route::RustaceansEdit { id: rustacean.id }}
                                         classes="link-secondary"
                                     >
                                         {"edit"}
                                     </Link<Route>>
                                     <span class="mx-1">{"/"}</span>
                                     <Link<Route>
-                                        to={Route::RustaceansDelete { id: rustacean.id }} 
+                                        to={Route::RustaceansDelete { id: rustacean.id }}
                                         classes="link-danger"
                                     >
                                         {"delete"}

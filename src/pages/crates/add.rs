@@ -1,16 +1,17 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::Route;
-use crate::components::header::Header;
 use crate::components::crate_form::CrateForm;
+use crate::components::header::Header;
 use crate::components::sidebar::Sidebar;
 use crate::contexts::CurrentUserContext;
 use crate::hooks::use_rustaceans;
+use crate::Route;
 
 #[function_component(CratesAdd)]
 pub fn crates_add() -> Html {
-    let current_user_ctx = use_context::<CurrentUserContext>().expect("Current user context is missing");
+    let current_user_ctx =
+        use_context::<CurrentUserContext>().expect("Current user context is missing");
 
     match &current_user_ctx.token {
         Some(token) => {
@@ -30,10 +31,10 @@ pub fn crates_add() -> Html {
                     </div>
                 </div>
             }
-        },
+        }
         None => html! {
             <Redirect<Route> to={Route::Login} />
-        }
+        },
     }
 }
 

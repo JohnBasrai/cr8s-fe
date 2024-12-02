@@ -10,7 +10,7 @@ pub struct Rustacean {
     pub id: i32,
     pub name: String,
     pub email: String,
-    pub created_at: String
+    pub created_at: String,
 }
 
 pub async fn api_rustaceans(token: &String) -> Result<Vec<Rustacean>, Error> {
@@ -31,7 +31,11 @@ pub async fn api_rustacean_show(token: &String, id: i32) -> Result<Rustacean, Er
     response.json::<Rustacean>().await
 }
 
-pub async fn api_rustacean_create(token: &String, name: String, email: String) -> Result<Rustacean, Error> {
+pub async fn api_rustacean_create(
+    token: &String,
+    name: String,
+    email: String,
+) -> Result<Rustacean, Error> {
     let response = Request::post(&format!("{}/rustaceans", APP_HOST))
         .header("Authorization", &format!("Bearer {}", token))
         .json(&json!({
@@ -44,7 +48,12 @@ pub async fn api_rustacean_create(token: &String, name: String, email: String) -
     response.json::<Rustacean>().await
 }
 
-pub async fn api_rustacean_update(token: &String, id: i32, name: String, email: String) -> Result<Rustacean, Error> {
+pub async fn api_rustacean_update(
+    token: &String,
+    id: i32,
+    name: String,
+    email: String,
+) -> Result<Rustacean, Error> {
     let response = Request::put(&format!("{}/rustaceans/{}", APP_HOST, id))
         .header("Authorization", &format!("Bearer {}", token))
         .json(&json!({

@@ -1,13 +1,12 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::Route;
 use crate::components::crate_form::CrateForm;
 use crate::components::header::Header;
 use crate::components::sidebar::Sidebar;
 use crate::contexts::CurrentUserContext;
-use crate::hooks::{use_rustaceans, use_crate};
-
+use crate::hooks::{use_crate, use_rustaceans};
+use crate::Route;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -16,7 +15,8 @@ pub struct Props {
 
 #[function_component(CratesEdit)]
 pub fn crates_edit(props: &Props) -> Html {
-    let current_user_ctx = use_context::<CurrentUserContext>().expect("Current user context is missing");
+    let current_user_ctx =
+        use_context::<CurrentUserContext>().expect("Current user context is missing");
 
     match &current_user_ctx.token {
         Some(token) => {
@@ -31,7 +31,7 @@ pub fn crates_edit(props: &Props) -> Html {
                         <div class="col mt-3">
                             <Header />
                             <Suspense fallback={loading}>
-                                <CrateEditForm 
+                                <CrateEditForm
                                     crate_id={props.crate_id}
                                     token={token.clone()}
                                 />
@@ -40,13 +40,12 @@ pub fn crates_edit(props: &Props) -> Html {
                     </div>
                 </div>
             }
-        },
+        }
         None => html! {
             <Redirect<Route> to={Route::Login} />
-        }
+        },
     }
 }
-
 
 #[derive(Properties, PartialEq)]
 struct CrateEditFormProps {

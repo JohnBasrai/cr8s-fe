@@ -1,15 +1,18 @@
-use web_sys::HtmlInputElement;
-use yew::{prelude::*, platform::spawn_local};
-use yew_router::prelude::*;
 use crate::components::button::Button;
+use web_sys::HtmlInputElement;
+use yew::{platform::spawn_local, prelude::*};
+use yew_router::prelude::*;
 
-use crate::Route;
+use crate::api::user::{api_login, api_me, LoginResponse, MeResponse};
 use crate::components::alert::Alert;
 use crate::components::input::Input;
-use crate::api::user::{api_login, api_me, LoginResponse, MeResponse};
-use crate::contexts::{CurrentUserContext, CurrentUserActions, CurrentUserDispatchActions};
+use crate::contexts::{CurrentUserActions, CurrentUserContext, CurrentUserDispatchActions};
+use crate::Route;
 
-async fn login(username: String, password: String) -> Result<(LoginResponse, MeResponse), gloo_net::Error> {
+async fn login(
+    username: String,
+    password: String,
+) -> Result<(LoginResponse, MeResponse), gloo_net::Error> {
     let login_reponse = api_login(username, password).await?;
     let me_response = api_me(&login_reponse.token).await?;
     Ok((login_reponse, me_response))
@@ -18,7 +21,8 @@ async fn login(username: String, password: String) -> Result<(LoginResponse, MeR
 #[function_component(LoginForm)]
 pub fn login_form() -> Html {
     let navigator = use_navigator().expect("Navigator not available");
-    let current_user_ctx = use_context::<CurrentUserContext>().expect("Current user context is missing");
+    let current_user_ctx =
+        use_context::<CurrentUserContext>().expect("Current user context is missing");
 
     let username_handle = use_state(String::default);
     let username = (*username_handle).clone();
@@ -60,7 +64,7 @@ pub fn login_form() -> Html {
                         me_response: Some(responses.1),
                     });
                     cloned_navigator.push(&Route::Home);
-                },
+                }
                 Err(e) => cloned_error_handle.set(e.to_string()),
             }
         });
