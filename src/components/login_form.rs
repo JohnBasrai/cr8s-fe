@@ -45,27 +45,27 @@ pub fn login_form() -> Html {
         }
     });
 
-    let cloned_username = username.clone();
-    let cloned_password = password.clone();
+    let username_ = username.clone();
+    let password_ = password.clone();
     let onsubmit = Callback::from(move |e: SubmitEvent| {
         e.prevent_default();
 
-        let cloned_username = cloned_username.clone();
-        let cloned_password = cloned_password.clone();
-        let cloned_error_handle = error_message_handle.clone();
-        let cloned_navigator = navigator.clone();
-        let cloned_user_ctx = current_user_ctx.clone();
+        let username_ = username_.clone();
+        let password_ = password_.clone();
+        let error_handle_ = error_message_handle.clone();
+        let navigator_ = navigator.clone();
+        let user_ctx_ = current_user_ctx.clone();
         spawn_local(async move {
-            match login(cloned_username.clone(), cloned_password.clone()).await {
+            match login(username_.clone(), password_.clone()).await {
                 Ok(responses) => {
-                    cloned_user_ctx.dispatch(CurrentUserDispatchActions {
+                    user_ctx_.dispatch(CurrentUserDispatchActions {
                         action_type: CurrentUserActions::LoginSuccess,
                         login_response: Some(responses.0),
                         me_response: Some(responses.1),
                     });
-                    cloned_navigator.push(&Route::Home);
+                    navigator_.push(&Route::Home);
                 }
-                Err(e) => cloned_error_handle.set(e.to_string()),
+                Err(e) => error_handle_.set(e.to_string()),
             }
         });
     });
