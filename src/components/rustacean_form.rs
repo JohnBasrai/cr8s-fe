@@ -50,45 +50,46 @@ pub fn rustacean_form(props: &Props) -> Html {
         }
     });
 
-    let cloned_name = name.clone();
-    let cloned_email = email.clone();
-    let cloned_rustacean = props.rustacean.clone();
+    let name_ = name.clone();
+    let email_ = email.clone();
+    let rustacean_ = props.rustacean.clone();
     let onsubmit = Callback::from(move |e: SubmitEvent| {
         e.prevent_default();
 
-        let cloned_name = cloned_name.clone();
-        let cloned_email = cloned_email.clone();
-        let cloned_rustacean = cloned_rustacean.clone();
-        let cloned_error_handle = error_message_handle.clone();
-        let cloned_navigator = navigator.clone();
-        let cloned_user_ctx = current_user_ctx.clone();
-        match &cloned_user_ctx.token {
+        let name_ = name_.clone();
+        let email_ = email_.clone();
+        let rustacean_ = rustacean_.clone();
+        let error_handle_ = error_message_handle.clone();
+        let navigator_ = navigator.clone();
+        let user_ctx_ = current_user_ctx.clone();
+
+        match &user_ctx_.token {
             Some(token) => {
-                let cloned_token = token.clone();
+                let token = token.clone();
                 spawn_local(async move {
-                    if let Some(rustacean) = cloned_rustacean {
+                    if let Some(rustacean) = rustacean_ {
                         match api_rustacean_update(
-                            &cloned_token, 
+                            &token, 
                             rustacean.id.clone(), 
-                            cloned_name.clone(), 
-                            cloned_email.clone()
+                            name_,
+                            email_,
                         ).await {
-                            Ok(_) => cloned_navigator.push(&Route::Rustaceans),
-                            Err(e) => cloned_error_handle.set(e.to_string()),
+                            Ok(_) => navigator_.push(&Route::Rustaceans),
+                            Err(e) => error_handle_.set(e.to_string()),
                         }
                     } else {
                         match api_rustacean_create(
-                            &cloned_token, 
-                            cloned_name.clone(), 
-                            cloned_email.clone()
+                            &token, 
+                            name_,
+                            email_,
                         ).await {
-                            Ok(_) => cloned_navigator.push(&Route::Rustaceans),
-                            Err(e) => cloned_error_handle.set(e.to_string()),
+                            Ok(_) => navigator_.push(&Route::Rustaceans),
+                            Err(e) => error_handle_.set(e.to_string()),
                         }
                     }
                 });
             },
-            None => cloned_error_handle.set("Session expired. Please login again".to_string()),
+            None => error_handle_.set("Session expired. Please login again".to_string()),
         }
     });
 

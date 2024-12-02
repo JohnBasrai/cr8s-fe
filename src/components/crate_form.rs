@@ -97,61 +97,61 @@ pub fn crate_form(props: &Props) -> Html {
         }
     });
 
-    let cloned_name = name.clone();
-    let cloned_code = code.clone();
-    let cloned_version = version.clone();
-    let cloned_rustacean_id = rustacean_id.clone();
-    let cloned_description = description.clone();
-    let cloned_crate = props.cr8.clone();
+    let name_ = name.clone();
+    let code_ = code.clone();
+    let version_ = version.clone();
+    let rustacean_id_ = rustacean_id.clone();
+    let description_ = description.clone();
+    let crate_ = props.cr8.clone();
     let onsubmit = Callback::from(move |e: SubmitEvent| {
         e.prevent_default();
 
-        let cloned_name = cloned_name.clone();
-        let cloned_code = cloned_code.clone();
-        let cloned_crate = cloned_crate.clone();
-        let cloned_version = cloned_version.clone();
-        let cloned_rustacean_id = cloned_rustacean_id.clone();
-        let cloned_description = cloned_description.clone();
-        let cloned_error_handle = error_message_handle.clone();
-        let cloned_navigator = navigator.clone();
-        let cloned_user_ctx = current_user_ctx.clone();
-        match &cloned_user_ctx.token {
+        let name_ = name_.clone();
+        let code_ = code_.clone();
+        let crate_ = crate_.clone();
+        let version_ = version_.clone();
+        let rustacean_id_ = rustacean_id_.clone();
+        let description_ = description_.clone();
+        let error_handle_ = error_message_handle.clone();
+        let navigator_ = navigator.clone();
+        let user_ctx_ = current_user_ctx.clone();
+        match &user_ctx_.token {
             Some(token) => {
-                let parsed_rustacean_id = cloned_rustacean_id.parse::<i32>();
-                let cloned_token = token.clone();
-                match parsed_rustacean_id {
+                let rustacean_id = rustacean_id_.parse::<i32>();
+                let token = token.clone();
+                match rustacean_id {
                     Ok(rustacean_id) => spawn_local(async move {
-                        if let Some(cr8) = cloned_crate {
+                        if let Some(cr8) = crate_ {
                             match api_crate_update(
-                                &cloned_token, 
+                                &token, 
                                 cr8.id.clone(), 
-                                cloned_name.clone(), 
-                                cloned_code.clone(),
+                                name_,
+                                code_,
                                 rustacean_id,
-                                cloned_version.clone(),
-                                cloned_description.clone()
+                                version_,
+                                description_
                             ).await {
-                                Ok(_) => cloned_navigator.push(&Route::Crates),
-                                Err(e) => cloned_error_handle.set(e.to_string()),
+                                Ok(_) => navigator_.push(&Route::Crates),
+                                Err(e) => error_handle_.set(e.to_string()),
                             }
                         } else {
                             match api_crate_create(
-                                &cloned_token, 
-                                cloned_name.clone(), 
-                                cloned_code.clone(),
+                                &token, 
+                                name_, 
+                                code_,
                                 rustacean_id,
-                                cloned_version.clone(),
-                                cloned_description.clone()
+                                version_,
+                                description_
                             ).await {
-                                Ok(_) => cloned_navigator.push(&Route::Crates),
-                                Err(e) => cloned_error_handle.set(e.to_string()),
+                                Ok(_) => navigator_.push(&Route::Crates),
+                                Err(e) => error_handle_.set(e.to_string()),
                             }
                         }
                     }),
-                    Err(_) => cloned_error_handle.set("Cannot parse rustacean ID".to_string()),
+                    Err(_) => error_handle_.set("Cannot parse rustacean ID".to_string()),
                 }
             },
-            None => cloned_error_handle.set("Session expired. Please login again".to_string()),
+            None => error_handle_.set("Session expired. Please login again".to_string()),
         }
     });
 
