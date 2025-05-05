@@ -18,7 +18,8 @@ Built with ⚡ hot‑reload via Trunk, stateless components, and a clean Tailwi
 
 ---
 
-## Quick Start
+## Quick Start  
+Choose **one** of the two paths below: **Native** or **Docker**
 
 ### Native (fastest feedback)
 
@@ -31,17 +32,15 @@ cargo install trunk wasm-bindgen-cli --locked   # once per machine
 
 trunk serve --address 0.0.0.0 --port 8080
 ```
-
-Open <http://localhost:8080>; edits in `src/**` hot‑reload in ~1 s.
-
 ### Docker (tool‑chain free)
 
 ```bash
-docker compose up --build           # or: docker compose up -d web
+docker compose up --build       # or: docker compose up -d web
 ```
 
-Stop with **Ctrl‑C** or `docker compose down -v`.
+For both choices above, open <http://localhost:8080>; edits you make in `src/**` will hot‑reload in ~1 s.
 
+To shutdown, for **Native** stop with **Ctrl‑C** or for **Docker** stop with `docker compose down -v`.
 
 ---
 
