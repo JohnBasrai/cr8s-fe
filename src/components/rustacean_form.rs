@@ -11,11 +11,13 @@ use crate::Route;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
+    #[prop_or_default]
     pub rustacean: Option<Rustacean>,
 }
 
 #[function_component(RustaceanForm)]
 pub fn rustacean_form(props: &Props) -> Html {
+    // ---
     let navigator = use_navigator().expect("Navigator not available");
     let current_user_ctx =
         use_context::<CurrentUserContext>().expect("Current user context is missing");
