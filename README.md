@@ -1,5 +1,5 @@
 
-# cr8s‑fe &nbsp;:art: 
+# cr8s-fe :art:
 
 [![CI](https://github.com/JohnBasrai/cr8s-fe/actions/workflows/ci.yml/badge.svg)](https://github.com/JohnBasrai/cr8s-fe/actions/workflows/ci.yml)
 
