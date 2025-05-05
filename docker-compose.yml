@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:            # hot-reload mounts
+      - ./src:/app/src
+      - ./index.html:/app/index.html
+      - ./style.scss:/app/style.scss
+    command: ["trunk","serve","--address","0.0.0.0","--port","80","--open=false"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost"]
+      interval: 5s
+      retries: 5

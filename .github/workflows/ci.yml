@@ -17,8 +17,8 @@ jobs:
     - name: 🦀  Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
       with:
-        # host triple + wasm so we can build either way
-        targets: wasm32-unknown-unknown
+        toolchain: 1.81 # Rust 1.81 is the current stable and required by trunk’s deps
+        targets: wasm32-unknown-unknown # host triple + wasm so we can build either way
         components: clippy, rustfmt
 
     - name: 💾  Cache cargo registry + target dirs
