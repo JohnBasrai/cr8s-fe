@@ -69,9 +69,7 @@ pub fn rustacean_form(props: &Props) -> Html {
                 let token = token.clone();
                 spawn_local(async move {
                     if let Some(rustacean) = rustacean_ {
-                        match api_rustacean_update(&token, rustacean.id.clone(), name_, email_)
-                            .await
-                        {
+                        match api_rustacean_update(&token, rustacean.id, name_, email_).await {
                             Ok(_) => navigator_.push(&Route::Rustaceans),
                             Err(e) => error_handle_.set(e.to_string()),
                         }
@@ -89,7 +87,7 @@ pub fn rustacean_form(props: &Props) -> Html {
 
     html! {
         <form onsubmit={onsubmit}>
-            if error_message.len() > 0 {
+            if !error_message.is_empty() {
                 <Alert alert_type={"danger"} message={error_message} />
             }
             <div class="mb-3">

@@ -55,7 +55,7 @@ struct CrateEditFormProps {
 
 #[function_component(CrateEditForm)]
 fn crate_edit_form(props: &CrateEditFormProps) -> HtmlResult {
-    let cr8 = use_crate(props.token.as_str(), props.crate_id.clone())?;
+    let cr8 = use_crate(props.token.as_str(), props.crate_id)?;
     let rustaceans = use_rustaceans(props.token.as_str())?;
     Ok(html! {
         <CrateForm cr8={cr8} authors={rustaceans} />

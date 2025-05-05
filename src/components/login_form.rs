@@ -72,7 +72,7 @@ pub fn login_form() -> Html {
 
     html! {
         <form onsubmit={onsubmit}>
-            if error_message.len() > 0 {
+            if !error_message.is_empty() {
                 <Alert alert_type={"danger"} message={error_message} />
             }
             <div class="mb-3">

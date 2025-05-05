@@ -126,7 +126,7 @@ pub fn crate_form(props: &Props) -> Html {
                         if let Some(cr8) = crate_ {
                             match api_crate_update(
                                 &token,
-                                cr8.id.clone(),
+                                cr8.id,
                                 name_,
                                 code_,
                                 rustacean_id,
@@ -173,7 +173,7 @@ pub fn crate_form(props: &Props) -> Html {
         .collect::<Vec<(AttrValue, AttrValue)>>();
     html! {
         <form onsubmit={onsubmit}>
-            if error_message.len() > 0 {
+            if !error_message.is_empty() {
                 <Alert alert_type={"danger"} message={error_message} />
             }
             <div class="mb-3">

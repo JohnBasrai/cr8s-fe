@@ -25,7 +25,7 @@ pub fn rustaceans_delete(props: &Props) -> Html {
 
     match &current_user_ctx.token {
         Some(token) => {
-            let rustacean_id = props.rustacean_id.clone();
+            let rustacean_id = props.rustacean_id;
             let token = token.to_owned();
             let onclick = Callback::from(move |e: MouseEvent| {
                 e.prevent_default();
@@ -49,12 +49,12 @@ pub fn rustaceans_delete(props: &Props) -> Html {
                         </div>
                         <div class="col mt-3">
                             <Header />
-                            if error_message.len() > 0 {
+                            if !error_message.is_empty() {
                                 <Alert alert_type={"danger"} message={error_message} />
                             }
                             <p>
                                 {"Are you sure you want to delete rustacean #"}
-                                {props.rustacean_id.clone()}
+                                {rustacean_id}
                             </p>
                             <button onclick={onclick} class="btn btn-danger">{"Delete"}</button>
                         </div>

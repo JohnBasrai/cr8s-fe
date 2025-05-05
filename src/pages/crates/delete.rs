@@ -25,17 +25,16 @@ pub fn crates_delete(props: &Props) -> Html {
 
     match &current_user_ctx.token {
         Some(token) => {
-            let cloned_id = props.crate_id.clone();
+            let crate_id = props.crate_id;
             let cloned_token = token.to_owned();
             let onclick = Callback::from(move |e: MouseEvent| {
                 e.prevent_default();
 
                 let cloned_navigator = navigator.clone();
                 let cloned_error_handle = error_message_handle.clone();
-                let cloned_id = cloned_id.clone();
                 let cloned_token = cloned_token.clone();
                 spawn_local(async move {
-                    match api_crate_delete(&cloned_token, cloned_id).await {
+                    match api_crate_delete(&cloned_token, crate_id).await {
                         Ok(()) => cloned_navigator.push(&Route::Crates),
                         Err(e) => cloned_error_handle.set(e.to_string()),
                     }
@@ -49,12 +48,12 @@ pub fn crates_delete(props: &Props) -> Html {
                         </div>
                         <div class="col mt-3">
                             <Header />
-                            if error_message.len() > 0 {
+                            if !error_message.is_empty() {
                                 <Alert alert_type={"danger"} message={error_message} />
                             }
                             <p>
                                 {"Are you sure you want to delete crate #"}
-                                {props.crate_id.clone()}
+                                {crate_id}
                             </p>
                             <button onclick={onclick} class="btn btn-danger">{"Delete"}</button>
                         </div>

@@ -55,7 +55,7 @@ struct RustaceanEditFormProps {
 
 #[function_component(RustaceanEditForm)]
 fn rustaceans_edit_form(props: &RustaceanEditFormProps) -> HtmlResult {
-    let rustacean = use_rustacean(props.token.as_str(), props.rustacean_id.clone())?;
+    let rustacean = use_rustacean(props.token.as_str(), props.rustacean_id)?;
 
     Ok(html! {
         <RustaceanForm rustacean={rustacean} />
