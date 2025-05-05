@@ -4,11 +4,14 @@ use yew::prelude::*;
 pub struct Props {
     pub label: AttrValue,
     pub button_type: AttrValue,
+
+    #[prop_or_default]
     pub onclick: Option<Callback<MouseEvent>>,
 }
 
 #[function_component(Button)]
 pub fn button(props: &Props) -> Html {
+    // ---
     let classes = classes!("btn", format!("btn-{}", props.button_type));
     match props.onclick.clone() {
         Some(callback) => html! {
