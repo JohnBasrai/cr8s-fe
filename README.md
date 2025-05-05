@@ -10,11 +10,14 @@ Built with ⚡ hot‑reload via Trunk, stateless components, and a clean Tailwi
 
 ## Prerequisites
 
-* **Rust 1.78 +** with the `wasm32-unknown-unknown` target
+* **Rust 1.81&nbsp;+** with the `wasm32-unknown-unknown` target  
   `rustup target add wasm32-unknown-unknown`
-* **Trunk** & **wasm‑bindgen CLI** (one‑time install)
+* **Trunk** & **wasm-bindgen CLI** (one-time install)  
   `cargo install trunk wasm-bindgen-cli --locked`
-* *(Optional)* **Docker ≥ 24** & Docker Compose
+* *(Optional)* **Docker ≥ 24** & Docker Compose
+
+> **Why 1.81?**  
+> Recent Trunk releases—and their transitive crates **`litemap`** and **`zerofrom`**—now require `rustc 1.81` or newer.
 
 ---
 
@@ -43,6 +46,42 @@ For both choices above, open <http://localhost:8080>; edits you make in `src/**`
 To shutdown, for **Native** stop with **Ctrl‑C** or for **Docker** stop with `docker compose down -v`.
 
 ---
+
+> **Heads-up:** When the container starts, Docker Compose may print  
+> `Enable Watch →  watch is not yet configured.`  
+> This is Compose’s optional *file-watch* feature. You don’t need it—  
+> Trunk inside the container already hot-reloads on `src/**` changes.  
+> Simply ignore the prompt (don’t type **w**) and keep coding.
+
+<details>
+<summary><strong>See hot-reload in action&nbsp;(30&nbsp;s)</strong></summary>
+
+   1. Open `src/components/login_form.rs`.  
+   2. Find the line that renders the username field:  
+
+```rust
+   <Input label="Username" ... />
+```
+
+   3. Change **`"Username"`** to **`"Enter your username"`** and **save**.
+   4. Watch the Docker/Trunk terminal — a quick re-compile appears.
+   5. Switch back to the browser (still on `/login`) — the placeholder now reads **Enter your username** without a manual refresh.
+
+*Revert the text and save again to watch it snap back.*
+
+</details>
+
+
+<!-- 
+### Need a tiny production image?  
+
+```bash
+docker build --target prod -t cr8s-fe:latest .
+docker run -p 8080:80 cr8s-fe:latest
+````
+
+---
+-->
 
 ## Running frontend + backend together
 
