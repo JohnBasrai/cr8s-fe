@@ -1,15 +1,16 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
 
-use crate::Route;
 use crate::components::header::Header;
 use crate::components::rustacean_list::RustaceanList;
 use crate::components::sidebar::Sidebar;
 use crate::contexts::CurrentUserContext;
+use crate::Route;
 
 #[function_component(Rustaceans)]
 pub fn rustaceans() -> Html {
-    let current_user_ctx = use_context::<CurrentUserContext>().expect("Current user context is missing");
+    let current_user_ctx =
+        use_context::<CurrentUserContext>().expect("Current user context is missing");
 
     match &current_user_ctx.token {
         Some(token) => {
@@ -29,10 +30,9 @@ pub fn rustaceans() -> Html {
                     </div>
                 </div>
             }
-        },
+        }
         None => html! {
             <Redirect<Route> to={Route::Login} />
-        }
+        },
     }
-    
 }

@@ -1,0 +1,45 @@
+name: ci
+
+on:
+  push:
+    branches: [ main, refactoring ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: ⬇️  Checkout
+      uses: actions/checkout@v4
+
+    - name: 🦀  Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        # host triple + wasm so we can build either way
+        targets: wasm32-unknown-unknown
+        components: clippy, rustfmt
+
+    - name: 💾  Cache cargo registry + target dirs
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    # ---------- quality gates ----------
+    - name: ✍️  cargo fmt
+      run: cargo fmt --all -- --check
+
+    - name: 🔎  cargo clippy
+      run: cargo clippy --workspace --all-targets -- -D warnings
+
+    # ---------- build ----------
+    - name: 🏗️  cargo build (host)
+      run: cargo build --release
+
+    - name: 🌐  cargo build (wasm32)
+      run: cargo build --release --target wasm32-unknown-unknown

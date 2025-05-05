@@ -1,9 +1,9 @@
-use gloo_net::Error;
 use gloo_net::http::Request;
+use gloo_net::Error;
 use serde::Deserialize;
 use serde_json::json;
 
-use super::APP_HOST;
+use super::app_host;
 
 #[derive(PartialEq)]
 pub struct User {
@@ -25,7 +25,7 @@ pub struct MeResponse {
 }
 
 pub async fn api_login(username: String, password: String) -> Result<LoginResponse, Error> {
-    let response = Request::post(&format!("{APP_HOST}/login"))
+    let response = Request::post(&format!("{}/login", &app_host()))
         .json(&json!({
             "username": username,
             "password": password
@@ -37,7 +37,7 @@ pub async fn api_login(username: String, password: String) -> Result<LoginRespon
 }
 
 pub async fn api_me(token: &String) -> Result<MeResponse, Error> {
-    let response = Request::get(&format!("{APP_HOST}/me"))
+    let response = Request::get(&format!("{}/me", &app_host()))
         .header("Authorization", &format!("Bearer {token}"))
         .send()
         .await?;

@@ -1,7 +1,7 @@
+use crate::hooks::use_crates;
+use crate::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::Route;
-use crate::hooks::use_crates;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -32,25 +32,25 @@ pub fn crate_list(props: &Props) -> HtmlResult {
                 </thead>
                 <tbody>
                 {
-                    crates.into_iter().map(|a_crate| {
+                    crates.into_iter().map(|cr8| {
                         html! {
                             <tr>
-                                <td>{a_crate.id}</td>
-                                <td>{a_crate.code}</td>
-                                <td>{a_crate.name}</td>
-                                <td>{a_crate.rustacean_id}</td>
-                                <td>{a_crate.version}</td>
-                                <td>{a_crate.description}</td>
+                                <td>{cr8.id}</td>
+                                <td>{cr8.code}</td>
+                                <td>{cr8.name}</td>
+                                <td>{cr8.rustacean_id}</td>
+                                <td>{cr8.version}</td>
+                                <td>{cr8.description}</td>
                                 <td>
-                                    <Link<Route> 
-                                        to={Route::CratesEdit { id: a_crate.id }} 
+                                    <Link<Route>
+                                        to={Route::CratesEdit { id: cr8.id }}
                                         classes="link-secondary"
                                     >
                                         {"edit"}
                                     </Link<Route>>
                                     <span class="mx-1">{"/"}</span>
                                     <Link<Route>
-                                        to={Route::CratesDelete { id: a_crate.id }} 
+                                        to={Route::CratesDelete { id: cr8.id }}
                                         classes="link-danger"
                                     >
                                         {"delete"}
