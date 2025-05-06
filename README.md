@@ -85,7 +85,7 @@ docker run -p 8080:80 cr8s-fe:latest
 
 ## Running frontend + backend together
 
-The frontend talks to the **cr8s** Rocket/Postgres API on <http://localhost:8000>.
+The frontend talks to the **[cr8s](https://github.com/JohnBasrai/cr8s)** Rocket/Postgres API on <http://localhost:8000>.
 You can keep them in separate repos or side‑by‑side in a monorepo—either way the steps
 are identical:
 
@@ -95,7 +95,7 @@ are identical:
 # ⬅︎ Terminal 1 – backend
 git clone https://github.com/JohnBasrai/cr8s.git
 cd cr8s
-cargo run --release              # 🚀 Rocket serves on :8000
+cargo run              # 🚀 Rocket serves on :8000
 ```
 
 ```bash
@@ -108,38 +108,58 @@ trunk serve --proxy-backend=http://localhost:8000 --address 0.0.0.0 --port 8080
 `trunk`’s `--proxy-backend` flag forwards any `/api/*` request from the browser to the
 backend, so you don’t have to fiddle with CORS during local dev.
 
-### Docker Compose (single command)
+### Alternative: Run backend via Docker
 
-If you prefer containers, create a `docker-compose.dev.yml` in *either* repo:
-
-```yaml
-services:
-  backend:
-    image: rust:1.78
-    working_dir: /app
-    volumes: ["../cr8s:/app"]
-    command: ["cargo","run","--release"]
-    ports: ["8000:8000"]
-
-  frontend:
-    build: ../cr8s-fe          # uses the Dockerfile already in the repo
-    ports: ["8080:80"]
-    volumes:
-      - ../cr8s-fe/src:/app/src
-      - ../cr8s-fe/index.html:/app/index.html
-      - ../cr8s-fe/style.scss:/app/style.scss
-    environment:
-      - TRUNK_PROXY_BACKEND=http://backend:8000
-```
-
-Then:
+If you're already using Docker for the backend, you can run:
 
 ```bash
-docker compose -f docker-compose.dev.yml up --build
+# (in a second terminal window or tab)
+cd ../cr8s
+./scripts/quickstart.sh
+```
+> 💡 Note: If you started the frontend using `docker compose up`, that terminal will remain open for logs. You’ll need to run this in a separate shell.
+
+### Docker Compose (all-in-one)
+
+To run both frontend and backend via Docker, just use the existing Compose config in the `cr8s` repo:
+
+👉 See: [cr8s/docker-compose.yml](https://github.com/JohnBasrai/cr8s/blob/main/docker-compose.yml)
+
+```bash
+cd ../cr8s
+./scripts/quickstart.sh      # starts backend and database services
+cd ../cr8s-fe
+
+# Skip this if you've already started the frontend above.
+docker compose up -d web     # launches frontend (http://localhost:8080)
 ```
 
 Browse to <http://localhost:8080>—the frontend proxies API calls to the backend
 container automatically.
+
+---
+
+## 🔒 Backend Login Test (Manual Smoke Test)
+
+Once the backend is running (via Docker or `cargo run`):
+> ⚠️ Make sure the backend is available at `http://localhost:8000`
+before launching the frontend.
+
+1. If you haven't already, open your browser to [http://127.0.0.1:8080](http://127.0.0.1:8080)
+2. Enter the default credentials:
+
+    ```
+    Username: admin@example.com
+    Password: password123
+    ```
+
+3. ✅ You should see the authenticated view (e.g. "Have a great day!")
+4. Feel free to try out the APIs.<br>
+   a) Click on Rustaceans<br>
+   b) Click on "Add a new rustacean"<br>
+   c) Enter some test values and press save<br>
+   d) Click on Crates<br>
+   e) Add a new crate<br>
 
 ---
 

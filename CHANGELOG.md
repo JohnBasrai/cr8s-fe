@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CI status badge and project structure map
   - Related-projects table (cr8s, axum-quickstart, rust-sqlx)
 
+### Docs
+  - Improved `cr8s-fe` README:
+    - Simplified Docker setup instructions
+    - Replaced outdated compose example with reference to cr8s repo
+    - Added realistic smoke test walkthrough with UI interactions
+
 ### Changed
 - Entire codebase reformatted via **`cargo fmt`**.
 - Clippy clean-ups:
