@@ -5,7 +5,12 @@ on:
     branches: [ main, refactoring ]
   pull_request:
     branches: [ main ]
-
+  workflow_dispatch:  # ← this enables manual runs from GitHub UI
+    inputs:
+      run_e2e:
+        description: 'Run end-to-end tests?'
+        required: false
+        default: 'true
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -48,6 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    if: github.event.inputs.run_e2e == 'true'
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4

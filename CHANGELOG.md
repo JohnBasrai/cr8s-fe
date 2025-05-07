@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.2] – 2025-05-06
 
 ### Added
+- Enabled manual GitHub Actions trigger (`workflow_dispatch`) with optional input to run E2E tests
+- Added conditional check to skip E2E tests unless explicitly requested
+- Added `docs/manual-e2e-tests.md` with detailed manual E2E instructions for cr8s-fe using Playwright
 - feat(dev-docker): hot-reload container + Rust 1.81 toolchain
 - **CI pipeline** (`.github/workflows/ci.yml`)
   Runs `cargo fmt`, `cargo clippy`, and dual `cargo build`
@@ -38,10 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `main.rs` to enable log level switching based on build mode
 
 ### CI/CD
-- Added `e2e` GitHub Actions job to run Playwright tests in headless mode on every push and PR
+- E2E tests in CI are gated via `workflow_dispatch` and require `run_e2e=true`.
 - Node.js and Playwright setup added to `.github/workflows/ci.yml`
 - Supports Chromium, Firefox, and WebKit
-- E2E tests run in parallel alongside Rust formatting and build checks
 - Includes inline job comments for clarity and future extension
 
 ### DevOps
