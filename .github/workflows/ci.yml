@@ -10,7 +10,7 @@ on:
       run_e2e:
         description: 'Run end-to-end tests?'
         required: false
-        default: 'true
+        default: 'true'
 jobs:
   check:
     runs-on: ubuntu-latest
