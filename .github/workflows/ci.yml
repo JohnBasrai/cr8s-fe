@@ -49,24 +49,29 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      # Step 1: Check out the repo code
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
 
-      # Step 2: Set up a Node.js runtime (for Playwright)
+      - name: 🐳 Start backend using quickstart.sh
+        run: |
+          git clone https://github.com/JohnBasrai/cr8s.git ../cr8s
+          cd ../cr8s
+          ./scripts/quickstart.sh
+          sleep 10
+
       - name: 🧰 Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # Step 3: Install npm dependencies (Playwright + its test runner)
       - name: 📦 Install NPM dependencies
         run: npm install
 
-      # Step 4: Install Playwright-managed browser binaries (Chromium, Firefox, WebKit)
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
 
-      # Step 5: Run all E2E tests in headless mode
+      - name: ⏳ Wait for frontend
+        run: npx wait-on http://localhost:8080/login
+
       - name: ✅ Run Playwright tests
         run: npm run test:e2e

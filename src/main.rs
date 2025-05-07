@@ -1,4 +1,3 @@
-use console_error_panic_hook;
 use log::Level;
 use wasm_logger::Config;
 
