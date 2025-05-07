@@ -43,3 +43,30 @@ jobs:
 
     - name: 🌐  cargo build (wasm32)
       run: cargo build --release --target wasm32-unknown-unknown
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # Step 1: Check out the repo code
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      # Step 2: Set up a Node.js runtime (for Playwright)
+      - name: 🧰 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Step 3: Install npm dependencies (Playwright + its test runner)
+      - name: 📦 Install NPM dependencies
+        run: npm install
+
+      # Step 4: Install Playwright-managed browser binaries (Chromium, Firefox, WebKit)
+      - name: 🎭 Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      # Step 5: Run all E2E tests in headless mode
+      - name: ✅ Run Playwright tests
+        run: npm run test:e2e
