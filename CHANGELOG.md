@@ -5,8 +5,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.1] – 2025-05-04
+## [Unreleased]
+
+## [0.1.2] – 2025-05-06
+
 ### Added
+- feat(dev-docker): hot-reload container + Rust 1.81 toolchain
 - **CI pipeline** (`.github/workflows/ci.yml`)
   Runs `cargo fmt`, `cargo clippy`, and dual `cargo build`
   (native + `wasm32-unknown-unknown`) with caching.
@@ -22,6 +26,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🔐 Auth helper extracted to `utils/auth.ts` for reuse
 - 🧪 `test.step()` used to group high-level actions for trace clarity
 
+### Changed
+- Mark optional fields for Yew 0.21 compatibility (#3)
+- Entire codebase reformatted via **`cargo fmt`**.
+- Clippy clean-ups:
+  - Replaced `len() > 0` with `is_empty()` checks.
+  - Removed redundant `clone()` calls on ID fields.
+  - Added missing trailing newlines.
+- Updated `.gitignore` to exclude Emacs backup files, `node_modules/`, and Playwright test artifacts
+- Added logging infrastructure (`log`, `wasm-logger`, `console_error_panic_hook`) for frontend debugging
+- Updated `main.rs` to enable log level switching based on build mode
+
 ### CI/CD
 - Added `e2e` GitHub Actions job to run Playwright tests in headless mode on every push and PR
 - Node.js and Playwright setup added to `.github/workflows/ci.yml`
@@ -34,20 +49,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created initial `playwright.config.ts` with multi-browser support and 60s timeout
 
 ### Docs
-  - Improved `cr8s-fe` README:
-    - Simplified Docker setup instructions
-    - Replaced outdated compose example with reference to cr8s repo
-    - Added realistic smoke test walkthrough with UI interactions
-
-### Changed
-- Entire codebase reformatted via **`cargo fmt`**.
-- Clippy clean-ups:
-  - Replaced `len() > 0` with `is_empty()` checks.
-  - Removed redundant `clone()` calls on ID fields.
-  - Added missing trailing newlines.
-- Updated `.gitignore` to exclude Emacs backup files, `node_modules/`, and Playwright test artifacts
-- Added logging infrastructure (`log`, `wasm-logger`, `console_error_panic_hook`) for frontend debugging
-- Updated `main.rs` to enable log level switching based on build mode
+- Clarify Quick Start – choose Native *or* Docker
+- Improved `cr8s-fe` README:
+  - Simplified Docker setup instructions
+  - Replaced outdated compose example with reference to cr8s repo
+  - Added realistic smoke test walkthrough with UI interactions
 
 ### Fixed
 - API helper calls now pass `id` by value, avoiding unnecessary copies.
