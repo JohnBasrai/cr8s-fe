@@ -5,8 +5,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.1] – 2025-05-04
+## [Unreleased]
+
+## [0.1.2] – 2025-05-06
+
 ### Added
+- Enabled manual GitHub Actions trigger (`workflow_dispatch`) with optional input to run E2E tests
+- Added conditional check to skip E2E tests unless explicitly requested
+- Added `docs/manual-e2e-tests.md` with detailed manual E2E instructions for cr8s-fe using Playwright
+- feat(dev-docker): hot-reload container + Rust 1.81 toolchain
 - **CI pipeline** (`.github/workflows/ci.yml`)
   Runs `cargo fmt`, `cargo clippy`, and dual `cargo build`
   (native + `wasm32-unknown-unknown`) with caching.
@@ -15,19 +22,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Frontend ↔ backend proxy instructions (two-terminal & Compose)
   - CI status badge and project structure map
   - Related-projects table (cr8s, axum-quickstart, rust-sqlx)
-
-### Docs
-  - Improved `cr8s-fe` README:
-    - Simplified Docker setup instructions
-    - Replaced outdated compose example with reference to cr8s repo
-    - Added realistic smoke test walkthrough with UI interactions
+- 🎭 Playwright test framework with cross-browser E2E support (Chromium, Firefox, WebKit)
+- ✅ End-to-end login test via `login.spec.ts`
+- ✅ Rustacean creation flow via `rustaceans.spec.ts`
+- ✅ Crate creation flow via `crates.spec.ts`, including author dropdown handling
+- 🔐 Auth helper extracted to `utils/auth.ts` for reuse
+- 🧪 `test.step()` used to group high-level actions for trace clarity
 
 ### Changed
+- Mark optional fields for Yew 0.21 compatibility (#3)
 - Entire codebase reformatted via **`cargo fmt`**.
 - Clippy clean-ups:
   - Replaced `len() > 0` with `is_empty()` checks.
   - Removed redundant `clone()` calls on ID fields.
   - Added missing trailing newlines.
+- Updated `.gitignore` to exclude Emacs backup files, `node_modules/`, and Playwright test artifacts
+- Added logging infrastructure (`log`, `wasm-logger`, `console_error_panic_hook`) for frontend debugging
+- Updated `main.rs` to enable log level switching based on build mode
+
+### CI/CD
+- E2E tests in CI are gated via `workflow_dispatch` and require `run_e2e=true`.
+- Node.js and Playwright setup added to `.github/workflows/ci.yml`
+- Supports Chromium, Firefox, and WebKit
+- Includes inline job comments for clarity and future extension
+
+### DevOps
+- Committed `package-lock.json` for reproducible test environments
+- Created initial `playwright.config.ts` with multi-browser support and 60s timeout
+
+### Docs
+- Clarify Quick Start – choose Native *or* Docker
+- Improved `cr8s-fe` README:
+  - Simplified Docker setup instructions
+  - Replaced outdated compose example with reference to cr8s repo
+  - Added realistic smoke test walkthrough with UI interactions
 
 ### Fixed
 - API helper calls now pass `id` by value, avoiding unnecessary copies.

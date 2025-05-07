@@ -5,7 +5,12 @@ on:
     branches: [ main, refactoring ]
   pull_request:
     branches: [ main ]
-
+  workflow_dispatch:  # ← this enables manual runs from GitHub UI
+    inputs:
+      run_e2e:
+        description: 'Run end-to-end tests?'
+        required: false
+        default: 'true'
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -43,3 +48,39 @@ jobs:
 
     - name: 🌐  cargo build (wasm32)
       run: cargo build --release --target wasm32-unknown-unknown
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    if: github.event.inputs.run_e2e == 'true'
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🐳 Start backend using quickstart.sh
+        run: |
+          git clone https://github.com/JohnBasrai/cr8s.git ../cr8s
+          cd ../cr8s
+          ./scripts/quickstart.sh
+          sleep 10
+
+      - name: 🧰 Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install NPM dependencies
+        run: npm install
+
+      - name: 🎭 Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: 🚀 Start frontend
+        run: docker compose up -d web
+
+      - name: ⏳ Wait for frontend
+        run: npx wait-on http://localhost:8080/login
+
+      - name: ✅ Run Playwright tests
+        run: npm run test:e2e

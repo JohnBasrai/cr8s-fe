@@ -1,0 +1,9 @@
+{
+    "devDependencies": {
+        "@playwright/test": "^1.52.0",
+        "wait-on": "^8.0.3"
+    },
+    "scripts": {
+        "test:e2e": "npx playwright test"
+    }
+}

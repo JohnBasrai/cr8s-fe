@@ -1,4 +1,5 @@
 use crate::components::button::Button;
+use log::debug;
 use web_sys::HtmlInputElement;
 use yew::{platform::spawn_local, prelude::*};
 use yew_router::prelude::*;
@@ -69,6 +70,10 @@ pub fn login_form() -> Html {
             }
         });
     });
+
+    {
+        debug!("Login form rendered");
+    }
 
     html! {
         <form onsubmit={onsubmit}>

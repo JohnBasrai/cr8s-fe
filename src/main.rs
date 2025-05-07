@@ -1,3 +1,6 @@
+use log::Level;
+use wasm_logger::Config;
+
 use yew::prelude::*;
 use yew_router::prelude::*;
 
@@ -68,5 +71,16 @@ fn app() -> Html {
 }
 
 fn main() {
+    // Show panics in browser console
+    console_error_panic_hook::set_once();
+
+    // Conditional logging level based on build mode
+    #[cfg(debug_assertions)]
+    wasm_logger::init(Config::new(Level::Debug));
+
+    #[cfg(not(debug_assertions))]
+    wasm_logger::init(Config::new(Level::Info));
+
+    log::info!("Starting frontend...");
     yew::Renderer::<App>::new().render();
 }

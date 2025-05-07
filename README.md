@@ -163,6 +163,14 @@ before launching the frontend.
 
 ---
 
+## 🧪 End-to-End Testing (Manual)
+
+E2E tests are not run in CI by default. To run them manually see the full instructions in [manual-e2e-tests.md](docs/manual-e2e-tests.md).
+
+> Note: E2E tests in CI are gated via `workflow_dispatch` and require `run_e2e=true`.
+
+---
+
 ## Continuous Integration
 
 Every push & PR runs **fmt → clippy → build (native + wasm)** via
