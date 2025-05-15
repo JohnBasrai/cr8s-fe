@@ -225,17 +225,22 @@ docker compose down -v
 docker compose down -v
 ```
 
+You may drop the `-v` if you want to preseve container cache to speed start up times.
+Also be sure you remove it from the _Initial Cleanup_ when you re-run.
+
 ---
 
-## 📝 Notes
+## 📝 Final Notes
 
 * E2E tests are **not run automatically in CI**. They must be invoked manually.
 * Although a manual trigger (`workflow_dispatch`) is wired up in GitHub Actions, the current setup **does not yet support full execution in CI**, due to environment limitations (e.g., missing dev container, frontend build timeouts).
 * We plan to address this by creating a custom development container and testing the workflow locally.
 * In the meantime, always run E2E tests manually from your development host.
 * Make sure the backend is accessible at `http://localhost:8000`.
-* Playwright tests run in **headless** mode by default. To run in a browser window:
+* Playwright tests run in **headless** mode by default. To run tests in _headed_ mode:
 
 ```bash
-npx playwright test --headed
+npx playwright test tests/playwright/login.spec.ts  --headed
+npx playwright test tests/playwright/rustaceans.spec.ts  --headed
+npx playwright test tests/playwright/crates.spec.ts  --headed
 ```

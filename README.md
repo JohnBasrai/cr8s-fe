@@ -37,9 +37,15 @@ trunk serve --address 0.0.0.0 --port 8080
 ```
 ### Docker (tool‑chain free)
 
-```bash
-docker compose up --build       # or: docker compose up -d web
-```
+> ```bash
+> docker compose up --build       # or: docker compose up -d web
+> ```
+
+Wait a rew seconds for server to start, it may take a while the first time.
+>```
+> # if use used 'Docker choice' above then you can view the logs here
+> docker compose logs -f web
+> ```
 
 For both choices above, open <http://localhost:8080>; edits you make in `src/**` will hot‑reload in ~1 s.
 
@@ -95,6 +101,7 @@ are identical:
 # ⬅︎ Terminal 1 – backend
 git clone https://github.com/JohnBasrai/cr8s.git
 cd cr8s
+git checkout v0.3.0    # ← ensure compatibility with cr8s-fe v0.1.3
 cargo run              # 🚀 Rocket serves on :8000
 ```
 
@@ -115,7 +122,10 @@ If you're already using Docker for the backend, you can run:
 ```bash
 # (in a second terminal window or tab)
 cd ../cr8s
-./scripts/quickstart.sh
+./scripts/start.sh
+./scripts/bootstrap.sh
+# Optional: seed default login user for manual testing
+docker exec -it cr8s-dev-${USER} cargo run --bin cli -- users create admin@example.com password123 admin
 ```
 > 💡 Note: If you started the frontend using `docker compose up`, that terminal will remain open for logs. You’ll need to run this in a separate shell.
 

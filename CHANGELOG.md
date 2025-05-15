@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] – 2025-05-14
+
+### Added
+- ✅ Verified full manual login flow using `admin@example.com / password123`
+- ✅ Enabled and passed Playwright login test across Chromium, Firefox, and WebKit
+- 🎭 Playwright test runner supports `--headed` execution (see updated docs)
+
+### Changed
+- 🔧 Replaced deprecated `quickstart.sh` with `start.sh` + `bootstrap.sh` in README
+- 🧪 Added optional CLI user creation command for manual testing workflows
+- 📄 Expanded Docker usage guidance in `README.md` (log viewing, volume behavior)
+- 📘 Clarified manual vs CI E2E execution in `docs/manual-e2e-tests.md`
+
+### Fixed
+- 🧪 Aligned frontend test assumptions with actual backend login behavior
+- Verified against cr8s backend at tag: `v0.3.0`
+
+---
+
+[0.1.3]: https://github.com/JohnBasrai/cr8s-fe/releases/tag/v0.1.3
+
 ## [0.1.2] – 2025-05-06
 
 ### Added
