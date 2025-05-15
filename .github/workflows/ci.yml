@@ -61,7 +61,7 @@ jobs:
       - name: 🐳 Start backend server
         run: |
           git clone https://github.com/JohnBasrai/cr8s.git ../cr8s
-          git checkout v0.3.0  # ← We are pegged at this version of be
+          git checkout v0.3.0  # ← We are pegged at this version of cr8s
           cd ../cr8s
           ./scripts/start.sh
           ./scripts/bootstrap.sh
@@ -88,7 +88,9 @@ jobs:
         run: npm run test:e2e
 
       - name: 🛑 Shut down services
-          docker compose down -v
-          cd ../cr8s
-          ./scripts/start.sh
+        continue-on-error: true
+        run: |
+          ./scripts/shutdown.sh
+          cd ../cr8s;
+          ./scripts/stop.sh
 
