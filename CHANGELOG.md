@@ -10,17 +10,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.3] – 2025-05-14
 
 ### Added
+- ✅ `scripts/quickstart.sh`: launches cr8s backend (cloned from version tag) and cr8s-fe frontend
+- ✅ `scripts/shutdown.sh`: stops frontend/backend containers and removes volumes
+- 📄 `docs/backend-version.txt`: tracks pinned backend version used during testing
+- 🧪 Playwright login, crate, and rustacean tests run individually with known-good results
+- 🔗 Issue #10 opened to track orchestration of full test suite
 - ✅ Verified full manual login flow using `admin@example.com / password123`
 - ✅ Enabled and passed Playwright login test across Chromium, Firefox, and WebKit
 - 🎭 Playwright test runner supports `--headed` execution (see updated docs)
 
 ### Changed
+- 🔧 CI now checks out `cr8s@v0.3.0` and runs backend setup manually via `start.sh` and `bootstrap.sh`
+- 📘 `manual-e2e-tests.md` rewritten to match Docker-first workflow and one-command test setup
+- 📘 `README.md` simplified: removed native/dual-terminal paths and made `quickstart.sh` canonical
+- 🧼 Project tree updated to reflect backend nested under `cr8s-fe/cr8s/` after cloning
 - 🔧 Replaced deprecated `quickstart.sh` with `start.sh` + `bootstrap.sh` in README
 - 🧪 Added optional CLI user creation command for manual testing workflows
 - 📄 Expanded Docker usage guidance in `README.md` (log viewing, volume behavior)
 - 📘 Clarified manual vs CI E2E execution in `docs/manual-e2e-tests.md`
 
 ### Fixed
+- 🧪 Removed flaky `npx playwright test` entry; now running specs individually to avoid discovery issues
 - 🧪 Aligned frontend test assumptions with actual backend login behavior
 - Verified against cr8s backend at tag: `v0.3.0`
 

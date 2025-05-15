@@ -58,11 +58,13 @@ jobs:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
 
-      - name: 🐳 Start backend using quickstart.sh
+      - name: 🐳 Start backend server
         run: |
           git clone https://github.com/JohnBasrai/cr8s.git ../cr8s
+          git checkout v0.3.0  # ← We are pegged at this version of be
           cd ../cr8s
-          ./scripts/quickstart.sh
+          ./scripts/start.sh
+          ./scripts/bootstrap.sh
           sleep 10
 
       - name: 🧰 Set up Node.js
@@ -84,3 +86,9 @@ jobs:
 
       - name: ✅ Run Playwright tests
         run: npm run test:e2e
+
+      - name: 🛑 Shut down services
+          docker compose down -v
+          cd ../cr8s
+          ./scripts/start.sh
+
