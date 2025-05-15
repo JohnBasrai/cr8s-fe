@@ -10,51 +10,53 @@ Built with ⚡ hot‑reload via Trunk, stateless components, and a clean Tailwi
 
 ## Prerequisites
 
-* **Rust 1.81&nbsp;+** with the `wasm32-unknown-unknown` target  
+* **Rust 1.83&nbsp;+** with the `wasm32-unknown-unknown` target  
   `rustup target add wasm32-unknown-unknown`
 * **Trunk** & **wasm-bindgen CLI** (one-time install)  
   `cargo install trunk wasm-bindgen-cli --locked`
 * *(Optional)* **Docker ≥ 24** & Docker Compose
 
-> **Why 1.81?**  
-> Recent Trunk releases—and their transitive crates **`litemap`** and **`zerofrom`**—now require `rustc 1.81` or newer.
+> **Why 1.83?**  
+> Recent Trunk releases—and their transitive crates **`litemap`** and **`zerofrom`**—now require `rustc 1.83` or newer.
 
 ---
 
 ## Quick Start  
-Choose **one** of the two paths below: **Native** or **Docker**
 
-### Native (fastest feedback)
+> ```bash
+> ./scripts/quickstart.sh
+> ```
 
-```bash
-git clone https://github.com/JohnBasrai/cr8s-fe.git
-cd cr8s-fe
+This launches the full stack:
+ - Clones and checks out the correct backend version (see docs/backend-version.txt)
+ - Starts Postgres, Redis, and Rocket backend
+ - Launches the frontend on http://localhost:8080
 
-rustup target add wasm32-unknown-unknown        # once per machine
-cargo install trunk wasm-bindgen-cli --locked   # once per machine
+> 🐳 Requires Docker ≥ 24 and Docker Compose v2
 
-trunk serve --address 0.0.0.0 --port 8080
-```
-### Docker (tool‑chain free)
+Open <http://localhost:8080>; edits you make in `src/**` will hot‑reload in ~1 s.
 
-```bash
-docker compose up --build       # or: docker compose up -d web
-```
+### 🧼 Stopping Services
 
-For both choices above, open <http://localhost:8080>; edits you make in `src/**` will hot‑reload in ~1 s.
+To stop both the backend and frontend containers and remove volumes:
 
-To shutdown, for **Native** stop with **Ctrl‑C** or for **Docker** stop with `docker compose down -v`.
+> ```
+> scripts/shutdown.sh
+> ```
+> Note: this also removes database volumes — login data will be reset.
 
 ---
 
 > **Heads-up:** When the container starts, Docker Compose may print  
+>
 > `Enable Watch →  watch is not yet configured.`  
+>
 > This is Compose’s optional *file-watch* feature. You don’t need it—  
 > Trunk inside the container already hot-reloads on `src/**` changes.  
 > Simply ignore the prompt (don’t type **w**) and keep coding.
 
 <details>
-<summary><strong>See hot-reload in action&nbsp;(30&nbsp;s)</strong></summary>
+<summary><strong>See hot-reload in action&nbsp;</strong></summary>
 
    1. Open `src/components/login_form.rs`.  
    2. Find the line that renders the username field:  
@@ -72,78 +74,11 @@ To shutdown, for **Native** stop with **Ctrl‑C** or for **Docker** stop with `
 </details>
 
 
-<!-- 
-### Need a tiny production image?  
-
-```bash
-docker build --target prod -t cr8s-fe:latest .
-docker run -p 8080:80 cr8s-fe:latest
-````
-
----
--->
-
-## Running frontend + backend together
-
-The frontend talks to the **[cr8s](https://github.com/JohnBasrai/cr8s)** Rocket/Postgres API on <http://localhost:8000>.
-You can keep them in separate repos or side‑by‑side in a monorepo—either way the steps
-are identical:
-
-### Two‑terminal approach
-
-```bash
-# ⬅︎ Terminal 1 – backend
-git clone https://github.com/JohnBasrai/cr8s.git
-cd cr8s
-cargo run              # 🚀 Rocket serves on :8000
-```
-
-```bash
-# ➡︎ Terminal 2 – frontend
-git clone https://github.com/JohnBasrai/cr8s-fe.git
-cd cr8s-fe
-trunk serve --proxy-backend=http://localhost:8000 --address 0.0.0.0 --port 8080
-```
-
-`trunk`’s `--proxy-backend` flag forwards any `/api/*` request from the browser to the
-backend, so you don’t have to fiddle with CORS during local dev.
-
-### Alternative: Run backend via Docker
-
-If you're already using Docker for the backend, you can run:
-
-```bash
-# (in a second terminal window or tab)
-cd ../cr8s
-./scripts/quickstart.sh
-```
-> 💡 Note: If you started the frontend using `docker compose up`, that terminal will remain open for logs. You’ll need to run this in a separate shell.
-
-### Docker Compose (all-in-one)
-
-To run both frontend and backend via Docker, just use the existing Compose config in the `cr8s` repo:
-
-👉 See: [cr8s/docker-compose.yml](https://github.com/JohnBasrai/cr8s/blob/main/docker-compose.yml)
-
-```bash
-cd ../cr8s
-./scripts/quickstart.sh      # starts backend and database services
-cd ../cr8s-fe
-
-# Skip this if you've already started the frontend above.
-docker compose up -d web     # launches frontend (http://localhost:8080)
-```
-
-Browse to <http://localhost:8080>—the frontend proxies API calls to the backend
-container automatically.
-
 ---
 
 ## 🔒 Backend Login Test (Manual Smoke Test)
 
-Once the backend is running (via Docker or `cargo run`):
-> ⚠️ Make sure the backend is available at `http://localhost:8000`
-before launching the frontend.
+Once the frontend & backend are running
 
 1. If you haven't already, open your browser to [http://127.0.0.1:8080](http://127.0.0.1:8080)
 2. Enter the default credentials:
@@ -176,24 +111,38 @@ E2E tests are not run in CI by default. To run them manually see the full instru
 Every push & PR runs **fmt → clippy → build (native + wasm)** via
 `.github/workflows/ci.yml`.
 
-1. `cargo fmt --all -- --check`
-2. `cargo clippy --workspace --all-targets -- -D warnings`
-3. `cargo build --release` (host)
-4. `cargo build --release --target wasm32-unknown-unknown`
-
 ---
 
 ## Project Structure
 
 ```
-src/
-├── api/           # REST/GraphQL helpers
-├── components/    # Re‑usable UI pieces
-├── pages/         # Top‑level routes
-├── contexts.rs    # Global state providers
-├── hooks.rs       # Custom hooks
-└── main.rs        # Yew entry‑point & router
-```
+cr8s-fe/
+├── cr8s/                       # Cloned cr8s backend (github) via quickstart.sh
+│   ├── Cargo.toml
+│   ├── scripts/
+│   └── ...
+├── Cargo.toml
+├── README.md
+├── CHANGELOG.md
+├── docs/
+│   ├── backend-version.txt     # Pinned cr8s backend version
+│   └── manual-e2e-tests.md     # E2E instructions for local dev
+├── public/
+│   └── index.html              # App entrypoint
+├── scripts/
+│   ├── quickstart.sh           # One-command dev startup (backend + frontend)
+│   └── shutdown.sh             # Stops all containers and removes volumes
+├── src/
+│   ├── api/                    # REST/GraphQL helpers
+│   ├── components/             # Reusable Yew components
+│   ├── pages/                  # Top-level routes
+│   ├── contexts.rs             # Global state providers
+│   ├── hooks.rs                # Custom hooks
+│   └── main.rs                 # Yew entrypoint & router
+├── style.scss
+├── tests/
+│   └── playwright/             # E2E browser tests (Playwright)
+└── docker-compose.yml          # Frontend container definition```
 
 ---
 
