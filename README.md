@@ -14,7 +14,7 @@ Built with ⚡ hot‑reload via Trunk, stateless components, and a clean Tailwi
   `rustup target add wasm32-unknown-unknown`
 * **Trunk** & **wasm-bindgen CLI** (one-time install)  
   `cargo install trunk wasm-bindgen-cli --locked`
-* *(Optional)* **Docker ≥ 24** & Docker Compose
+* **Docker ≥ 24** & Docker Compose
 
 > **Why 1.83?**  
 > Recent Trunk releases—and their transitive crates **`litemap`** and **`zerofrom`**—now require `rustc 1.83` or newer.
@@ -98,7 +98,7 @@ Once the frontend & backend are running
 
 ---
 
-## 🧪 End-to-End Testing (Manual)
+## 🧪 End-to-End Testing
 
 E2E tests are not run in CI by default. To run them manually see the full instructions in [manual-e2e-tests.md](docs/manual-e2e-tests.md).
 
@@ -108,7 +108,7 @@ E2E tests are not run in CI by default. To run them manually see the full instru
 
 ## Continuous Integration
 
-Every push & PR runs **fmt → clippy → build (native + wasm)** via
+Every push & PR runs **fmt → clippy → build (native + wasm) → End-to-End Test** via
 `.github/workflows/ci.yml`.
 
 ---
@@ -148,11 +148,14 @@ cr8s-fe/
 
 ### Related Projects
 
-| Project | What it shows off |
-|---------|------------------|
-| **[cr8s](https://github.com/JohnBasrai/cr8s)** | Rocket + Postgres backend that powers this UI |
-| **[axum-quickstart](https://github.com/JohnBasrai/axum-quickstart)** | Production-ready REST API using Axum, Redis, and Tokio |
-| **[rust-sqlx](https://github.com/JohnBasrai/rust-sqlx)** | Async Postgres examples leveraging SQLx enum mapping |
+### Related Projects
+
+| Project                                                                 | What it shows off                                           |
+|-------------------------------------------------------------------------|-------------------------------------------------------------|
+| **[cr8s](https://github.com/JohnBasrai/cr8s)**                          | Rocket + Postgres backend that powers this UI               |
+| **[axum-quickstart](https://github.com/JohnBasrai/axum-quickstart)**   | Production-ready REST API using Axum, Redis, and Tokio      |
+| **[rust-sqlx](https://github.com/JohnBasrai/rust-sqlx)**               | Async Postgres examples leveraging SQLx enum mapping        |
+
 
 ---
 
