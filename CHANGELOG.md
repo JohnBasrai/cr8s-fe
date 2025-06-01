@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-06-02
+
+### Added
+- Enhanced quickstart.sh with flexible lint checking options (`--no-lint`, `--full-lint`, `--verbose`)
+- Full lint mode includes security audit and outdated dependency checks
+- Comprehensive user role assignment (admin, editor, viewer) for default test user
+- SQL directory management with automatic creation in quickstart script
+- Enhanced CI workflow with unified test and build process
+- Dockerfile.server now supports configurable CR8S_VERSION build argument
+- User role verification query for debugging authentication setup
+
+### Changed
+- **BREAKING**: Updated to cr8s backend v0.4.3 from v0.4.2
+- Streamlined CI workflow to single `test` job with conditional E2E execution
+- E2E tests now run by default unless explicitly disabled via workflow_dispatch
+- Quickstart script now rebuilds server container to ensure latest code
+- Default test user now has all three roles (admin, editor, viewer) instead of just admin
+- Improved error handling and logging throughout quickstart process
+- CI timeout increased to 15 minutes for comprehensive testing
+
+### Fixed
+- Docker build context properly passes CR8S_VERSION argument to server build
+- SQL file management prevents conflicts between quickstart runs
+- User creation process more robust with better error messaging
+- Container cleanup more reliable in CI with proper error handling
+
+### Technical Details
+- Backend: cr8s v0.4.3 (containerized)
+- CI: Single job workflow with optional E2E testing
+- Lint: Configurable cargo fmt, clippy, audit, and outdated checks
+- Security: Default user has comprehensive role access for testing
+
+---
+
+## [0.2.0] - 2025-06-02
+
+### Added
+- Unified docker-compose.yml with full-stack development environment
+- Automatic database schema and role initialization via quickstart script
+- Support for cr8s backend v0.4.2 with containerized workflow
+- Environment variable configuration (.env) for backend version management
+- Custom Dockerfile.server with curl for health checks
+- Enhanced volume mounts for complete hot reload support (Cargo.toml, Cargo.lock, yew-logo.svg)
+- Container networking configuration for frontend-backend communication
+- Simplified development workflow with single-command setup
+
+### Changed
+- **BREAKING**: Development workflow now requires Docker only (no local Rust installation)
+- Updated quickstart.sh to use unified docker-compose instead of separate backend cloning
+- Simplified prerequisites in README - removed local Rust toolchain requirements
+- Updated shutdown.sh for unified container management
+- Enhanced manual E2E testing documentation with simplified workflow
+- Migrated from backend-version.txt to .env file for version configuration
+- Updated project structure documentation to reflect new containerized approach
+
+### Fixed
+- Frontend-backend communication issues with proper container hostname resolution
+- Environment variable handling for BACKEND_URL, ROCKET_HOST, and ROCKET_PORT
+- Database initialization race conditions with health check dependencies
+- Missing asset files (yew-logo.svg) causing build failures
+
+### Removed
+- Local Rust toolchain requirements from prerequisites
+- backend-version.txt file (replaced with .env)
+- Complex git clone/checkout workflow in quickstart script
+- Separate backend repository management
+
+### Technical Details
+- Backend: cr8s v0.4.2 (containerized)
+- Frontend: Yew with Trunk hot reload
+- Database: Automatic PostgreSQL schema setup
+- Authentication: Default admin user (admin@example.com / password123)
+- Development: Single docker-compose command workflow
+
+
 ## [0.1.3] – 2025-05-14
 
 ### Added

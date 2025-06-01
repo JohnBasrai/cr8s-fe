@@ -1,23 +1,17 @@
-
 # cr8s-fe :art:
 
 [![CI](https://github.com/JohnBasrai/cr8s-fe/actions/workflows/ci.yml/badge.svg)](https://github.com/JohnBasrai/cr8s-fe/actions/workflows/ci.yml)
 
 Yew/WASM frontend companion to the **cr8s** Rust backend.
-Built with ⚡ hot‑reload via Trunk, stateless components, and a clean Tailwind‑free CSS layer (see `style.scss`).
+Built with ⚡ hot‑reload via Trunk, stateful components, and a clean Tailwind‑free CSS layer (see `style.scss`).
 
 ---
 
 ## Prerequisites
 
-* **Rust 1.83&nbsp;+** with the `wasm32-unknown-unknown` target  
-  `rustup target add wasm32-unknown-unknown`
-* **Trunk** & **wasm-bindgen CLI** (one-time install)  
-  `cargo install trunk wasm-bindgen-cli --locked`
-* **Docker ≥ 24** & Docker Compose
+* **Docker ≥ 24** & Docker Compose v2
 
-> **Why 1.83?**  
-> Recent Trunk releases—and their transitive crates **`litemap`** and **`zerofrom`**—now require `rustc 1.83` or newer.
+> **No local Rust installation required!** Everything runs in containers with the pre-built development image.
 
 ---
 
@@ -28,22 +22,61 @@ Built with ⚡ hot‑reload via Trunk, stateless components, and a clean Tailwi
 > ```
 
 This launches the full stack:
- - Clones and checks out the correct backend version (see docs/backend-version.txt)
- - Starts Postgres, Redis, and Rocket backend
- - Launches the frontend on http://localhost:8080
+ - Starts PostgreSQL, Redis, and cr8s backend (v0.4.3)
+ - Loads database schema and default roles
+ - Creates test user: `admin@example.com` / `password123` (with admin, editor, viewer roles)
+ - Launches the frontend with hot reload on http://localhost:8080
 
 > 🐳 Requires Docker ≥ 24 and Docker Compose v2
 
-Open <http://localhost:8080>; edits you make in `src/**` will hot‑reload in ~1 s.
+Open <http://localhost:8080>; edits you make in `src/**` will hot‑reload in ~1 s.
 
 ### 🧼 Stopping Services
 
-To stop both the backend and frontend containers and remove volumes:
+To stop all services and remove containers and volumes:
 
 > ```
-> scripts/shutdown.sh
+> ./scripts/shutdown.sh
 > ```
 > Note: this also removes database volumes — login data will be reset.
+
+### Development Workflow
+
+**Common development tasks:**
+
+```bash
+# Start development environment (with basic lint checks)
+./scripts/quickstart.sh
+
+# Fast startup (skip all lint checks)
+./scripts/quickstart.sh --no-lint
+
+# Comprehensive startup (includes security audit & outdated deps)
+./scripts/quickstart.sh --full-lint
+
+# Verbose debugging mode
+./scripts/quickstart.sh --verbose
+
+# Run cargo commands in frontend container
+docker compose exec web cargo check
+docker compose exec web cargo test
+
+# Use backend CLI tools
+docker compose run --rm cli list-users
+docker compose run --rm cli create-user user@example.com password123 viewer
+
+# View logs
+docker compose logs web      # frontend logs
+docker compose logs server   # backend logs
+
+# Stop everything and clean up
+./scripts/shutdown.sh
+```
+
+**Configuration:**
+- Backend version controlled by `.env` file (currently v0.4.3)
+- Frontend source code mounted for hot reload development
+- Database persists between restarts (until `shutdown.sh` runs)
 
 ---
 
@@ -51,9 +84,9 @@ To stop both the backend and frontend containers and remove volumes:
 >
 > `Enable Watch →  watch is not yet configured.`  
 >
-> This is Compose’s optional *file-watch* feature. You don’t need it—  
+> This is Compose's optional *file-watch* feature. You don't need it—  
 > Trunk inside the container already hot-reloads on `src/**` changes.  
-> Simply ignore the prompt (don’t type **w**) and keep coding.
+> Simply ignore the prompt (don't type **w**) and keep coding.
 
 <details>
 <summary><strong>See hot-reload in action&nbsp;</strong></summary>
@@ -65,14 +98,13 @@ To stop both the backend and frontend containers and remove volumes:
    <Input label="Username" ... />
 ```
 
-   3. Change **`"Username"`** to **`"Enter your username"`** and **save**.
+   3. Change **`"Username"`** to **`"Enter your username"`** and **save**.
    4. Watch the Docker/Trunk terminal — a quick re-compile appears.
    5. Switch back to the browser (still on `/login`) — the placeholder now reads **Enter your username** without a manual refresh.
 
 *Revert the text and save again to watch it snap back.*
 
 </details>
-
 
 ---
 
@@ -100,32 +132,28 @@ Once the frontend & backend are running
 
 ## 🧪 End-to-End Testing
 
-E2E tests are not run in CI by default. To run them manually see the full instructions in [manual-e2e-tests.md](docs/manual-e2e-tests.md).
+E2E tests run by default in CI. To run them manually see the full instructions in [docs/manual-e2e-tests.md](docs/manual-e2e-tests.md).
 
-> Note: E2E tests in CI are gated via `workflow_dispatch` and require `run_e2e=true`.
-
----
-
-## Continuous Integration
-
-Every push & PR runs **fmt → clippy → build (native + wasm) → End-to-End Test** via
-`.github/workflows/ci.yml`.
+> Note: E2E tests can be disabled in CI via `workflow_dispatch` with `run_e2e=false`.
 
 ---
 
-## Project Structure
+## Continuous Integration
+
+Every push & PR runs **quickstart → lint checks → build → E2E tests** via
+`.github/workflows/ci.yml`. The CI includes configurable lint levels and comprehensive testing across multiple browsers.
+
+---
+
+## Project Structure
 
 ```
 cr8s-fe/
-├── cr8s/                       # Cloned cr8s backend (github) via quickstart.sh
-│   ├── Cargo.toml
-│   ├── scripts/
-│   └── ...
+├── .env                        # Backend version configuration
 ├── Cargo.toml
 ├── README.md
 ├── CHANGELOG.md
 ├── docs/
-│   ├── backend-version.txt     # Pinned cr8s backend version
 │   └── manual-e2e-tests.md     # E2E instructions for local dev
 ├── public/
 │   └── index.html              # App entrypoint
@@ -142,11 +170,10 @@ cr8s-fe/
 ├── style.scss
 ├── tests/
 │   └── playwright/             # E2E browser tests (Playwright)
-└── docker-compose.yml          # Frontend container definition```
+└── docker-compose.yml          # Full-stack container definition
+```
 
 ---
-
-### Related Projects
 
 ### Related Projects
 
@@ -156,9 +183,8 @@ cr8s-fe/
 | **[axum-quickstart](https://github.com/JohnBasrai/axum-quickstart)**   | Production-ready REST API using Axum, Redis, and Tokio      |
 | **[rust-sqlx](https://github.com/JohnBasrai/rust-sqlx)**               | Async Postgres examples leveraging SQLx enum mapping        |
 
-
 ---
 
 ## License
 
-MIT © John Basrai
+MIT © John Basrai

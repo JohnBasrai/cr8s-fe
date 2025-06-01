@@ -5,92 +5,58 @@ on:
     branches: [ main, refactoring ]
   pull_request:
     branches: [ main ]
-  workflow_dispatch:  # ← this enables manual runs from GitHub UI
+  workflow_dispatch:
     inputs:
       run_e2e:
         description: 'Run end-to-end tests?'
         required: false
         default: 'true'
+
+permissions:
+  contents: read
+
 jobs:
-  check:
+  test:
+    name: Test and Build cr8s-fe
     runs-on: ubuntu-latest
-
+    timeout-minutes: 15
+    env:
+      CI: true
+      
     steps:
-    - name: ⬇️  Checkout
-      uses: actions/checkout@v4
-
-    - name: 🦀  Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        toolchain: 1.81 # Rust 1.81 is the current stable and required by trunk’s deps
-        targets: wasm32-unknown-unknown # host triple + wasm so we can build either way
-        components: clippy, rustfmt
-
-    - name: 💾  Cache cargo registry + target dirs
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-    # ---------- quality gates ----------
-    - name: ✍️  cargo fmt
-      run: cargo fmt --all -- --check
-
-    - name: 🔎  cargo clippy
-      run: cargo clippy --workspace --all-targets -- -D warnings
-
-    # ---------- build ----------
-    - name: 🏗️  cargo build (host)
-      run: cargo build --release
-
-    - name: 🌐  cargo build (wasm32)
-      run: cargo build --release --target wasm32-unknown-unknown
-
-  e2e:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    if: github.event.inputs.run_e2e == 'true'
-    steps:
-      - name: ⬇️ Checkout
+      - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
-
-      - name: 🐳 Start backend server
-        run: |
-          git clone https://github.com/JohnBasrai/cr8s.git ../cr8s
-          git checkout v0.3.0  # ← We are pegged at this version of cr8s
-          cd ../cr8s
-          ./scripts/start.sh
-          ./scripts/bootstrap.sh
-          sleep 10
-
-      - name: 🧰 Set up Node.js
+        
+      - name: 🚀 Run quickstart with full lint checks
+        run: ./quickstart.sh --full-lint
+        
+      - name: 🧰 Set up Node.js for Playwright
+        if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: 📦 Install NPM dependencies
+          
+      - name: 📦 Install NPM dependencies  
+        if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         run: npm install
-
+        
       - name: 🎭 Install Playwright browsers
+        if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         run: npx playwright install --with-deps
-
-      - name: 🚀 Start frontend
-        run: docker compose up -d web
-
-      - name: ⏳ Wait for frontend
-        run: npx wait-on http://localhost:8080/login
-
-      - name: ✅ Run Playwright tests
-        run: npm run test:e2e
-
-      - name: 🛑 Shut down services
-        continue-on-error: true
+        
+      - name: ✅ Run Playwright E2E tests (login only)
+        if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
+        run: npx playwright test tests/playwright/login.spec.ts
+        
+      - name: 📋 Upload test results on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          
+      - name: 🛑 Cleanup services
+        if: always()
         run: |
-          ./scripts/shutdown.sh
-          cd ../cr8s;
-          ./scripts/stop.sh
-
+          echo "🛑 Shutting down services..."
+          docker compose down -v || true

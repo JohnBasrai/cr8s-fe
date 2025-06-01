@@ -1,0 +1,8 @@
+ARG CR8S_VERSION=0.4.3  # Default value - only used if not overridden
+FROM ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
+LABEL cr8s.base.version=${CR8S_VERSION}
+# Install curl for health checks
+USER root
+RUN echo "Building server version ${CR8S_VERSION}" ; \
+    apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+USER appuser

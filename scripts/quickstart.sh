@@ -1,57 +1,116 @@
 #!/bin/bash
-# quickstart.sh - Launches cr8s backend (checked out from version tag) and cr8s-fe
-# frontend for local development or E2E testing
+# quickstart.sh - Launches cr8s full-stack (backend + frontend) for development
 
 set -euo pipefail
 
-# Constants
-CR8S_DIR="../cr8s"
-BACKEND_VERSION_FILE="docs/backend-version.txt"
-DEV_CONTAINER="cr8s-dev-${USER}"
+echo "🚀 Starting cr8s full-stack development environment..."
 
-# Read the tag from backend-version.txt
-if [[ ! -f "$BACKEND_VERSION_FILE" ]]; then
-  echo "❌ $BACKEND_VERSION_FILE not found. Please create it with a line like:"
-  echo "cr8s version: v0.3.0"
-  exit 1
+# Source environment variables
+source .env
+
+# Parse command line arguments
+LINT_MODE="basic"  # Default mode
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --no-lint)
+            LINT_MODE="none"
+            ;;
+        --full-lint)
+            LINT_MODE="full"
+            ;;
+        --verbose)
+            set -x
+            LOGLEVEL=debug
+            typeset -x LOG=echo
+            typeset -x RUST_LOG=debug
+            typeset -x DEBUG_MODE=yes
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--no-lint|--full-lint] [--verbose]"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# Display lint mode
+case $LINT_MODE in
+    none)
+        echo "⚡ Skipping lint checks for fast startup..."
+        ;;
+    full)
+        echo "🔍 Running FULL lint checks (fmt + clippy + audit + outdated)..."
+        ;;
+    basic)
+        echo "🔍 Running basic lint checks (fmt + clippy)..."
+        ;;
+esac
+
+# Run lint checks based on mode
+if [[ "$LINT_MODE" != "none" ]]; then
+    echo "  ✍️  Checking code formatting..."
+    docker compose run --rm web cargo fmt --all -- --check
+
+    echo "  🔎 Running clippy lints..."
+    docker compose run --rm web cargo clippy --workspace --all-targets -- -D warnings
+
+    # Additional checks only with --full-lint
+    if [[ "$LINT_MODE" == "full" ]]; then
+        echo "  🔒 Running security audit..."
+        docker compose run --rm web cargo audit --ignore RUSTSEC-2023-0071 || true
+        
+        echo "  📦 Checking for outdated dependencies..."
+        docker compose run --rm web cargo outdated || true
+    fi
+
+    echo "✅ Lint checks passed!"
 fi
 
-CR8S_TAG=$(grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' "$BACKEND_VERSION_FILE")
+echo "🔨 Building server with latest code..."
+docker compose build server
 
-if [[ -z "$CR8S_TAG" ]]; then
-  echo "❌ Failed to parse cr8s version from $BACKEND_VERSION_FILE"
-  exit 1
-fi
+# Start all services
+echo "📦 Starting backend and frontend services..."
+docker compose up -d
 
-echo "🚀 Setting up backend from cr8s@$CR8S_TAG..."
+# Wait for services to be healthy
+echo "⏳ Waiting for services to be ready..."
+docker compose up --wait
 
-# Clone if missing
-if [ ! -d "$CR8S_DIR" ]; then
-  cd ..
-  git clone https://github.com/JohnBasrai/cr8s.git "$CR8S_DIR"
-  cd "$CR8S_DIR"
-  git fetch --tags
-  echo "🔁 Detached HEAD — switching to tag $CR8S_TAG"
-  git checkout "$CR8S_TAG"
-else
-  cd "$CR8S_DIR"
-  echo "🔎 Working on branch: $(git rev-parse --abbrev-ref HEAD) — leaving as-is"
-fi
+# Extract database schema
+echo "🗄️  Loading database schema..."
+CR8S_URL=https://codeload.github.com/JohnBasrai/cr8s/tar.gz/v${CR8S_VERSION}
+curl --fail --silent --show-error --location --output - $CR8S_URL |
+  tar xfvz - cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql
 
-./scripts/start.sh
-./scripts/bootstrap.sh
+# Load schema into postgres
+docker compose exec -T postgres psql -U postgres -d cr8s < cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql
+mkdir -p scripts/sql/ ; mv cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql scripts/sql/db-init.sql
 
-echo "👤 Seeding default test user (admin@example.com)..."
-docker exec -it "$DEV_CONTAINER" \
-  cargo run --bin cli -- users create admin@example.com password123 admin || true
+# Insert default roles (Admin, Editor, Viewer)
+echo "👥 Adding default roles..."
+docker compose exec -T postgres psql -U postgres -d cr8s << 'EOF'
+INSERT INTO role (code, name) VALUES 
+  ('Admin', 'Admin'),
+  ('Editor', 'Editor'), 
+  ('Viewer', 'Viewer')
+ON CONFLICT (code) DO NOTHING;
+EOF
 
-echo "🧠 Starting backend server inside $DEV_CONTAINER..."
-docker exec -d "$DEV_CONTAINER" \
-       bash -c 'cargo run --bin server > /tmp/server.log 2>&1'
+# Seed default test user
+echo "👤 Creating default test user (admin@example.com)..."
+docker compose run --rm cli create-user \
+       --username admin@example.com \
+       --password password123 \
+       --roles admin,editor,viewer || echo "ℹ️  User may already exist"
 
-cd - > /dev/null
-
-echo "🎨 Starting frontend..."
-docker compose up -d web
+docker compose exec postgres psql -U postgres -d cr8s -c \
+    "SELECT u.username, r.code FROM app_user u 
+     JOIN user_roles ur ON u.id = ur.user_id 
+     JOIN role r ON ur.role_id = r.id 
+     WHERE u.username = 'admin@example.com';"
 
 echo "✅ Quickstart complete! Open http://localhost:8080"
+echo "📧 Test login: admin@example.com / password123"
