@@ -100,17 +100,26 @@ ON CONFLICT (code) DO NOTHING;
 EOF
 
 # Seed default test user
+# CLI user creation should fail if it doesn't work
 echo "👤 Creating default test user (admin@example.com)..."
-docker compose run --rm cli create-user \
+if ! docker compose run --rm cli create-user \
        --username admin@example.com \
        --password password123 \
-       --roles admin,editor,viewer || echo "ℹ️  User may already exist"
+       --roles admin,editor,viewer; then
+    echo "❌ FATAL: Failed to create test user"
+    exit 1
+fi
 
-docker compose exec postgres psql -U postgres -d cr8s -c \
-    "SELECT u.username, r.code FROM app_user u 
-     JOIN user_roles ur ON u.id = ur.user_id 
-     JOIN role r ON ur.role_id = r.id 
-     WHERE u.username = 'admin@example.com';"
+# Verify user was actually created
+echo "🔍 Verifying test user creation..."
+USER_COUNT=$(docker compose exec postgres psql -U postgres -d cr8s -t -c \
+    "SELECT COUNT(*) FROM app_user WHERE username = 'admin@example.com';")
+
+if [ "${USER_COUNT// /}" != "1" ]; then
+    echo "❌ FATAL: Test user was not created successfully"
+    echo "Expected 1 user, found: ${USER_COUNT// /}"
+    exit 1
+fi
 
 echo "✅ Quickstart complete! Open http://localhost:8080"
 echo "📧 Test login: admin@example.com / password123"
