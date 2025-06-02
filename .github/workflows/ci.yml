@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
         
       - name: 🚀 Run quickstart with full lint checks
-        run: ./quickstart.sh --full-lint
+        run: ./scripts/quickstart.sh --full-lint
         
       - name: 🧰 Set up Node.js for Playwright
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
