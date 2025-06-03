@@ -1,14 +1,85 @@
 services:
+  # Backend infrastructure
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: cr8s
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend server (cr8s)
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+      args:
+        - CR8S_VERSION=${CR8S_VERSION}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      ROCKET_PROFILE: default
+      DATABASE_URL: postgres://postgres:secret@postgres:5432/cr8s
+      REDIS_URL: redis://redis:6379/
+      RUST_BACKTRACE: 1
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # CLI tool (optional, for admin tasks)
+  cli:
+    image: ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://postgres:secret@postgres:5432/cr8s
+      REDIS_URL: redis://redis:6379/
+    profiles:
+      - tools  # Only start when explicitly requested with --profile tools
+
+  # Frontend (cr8s-fe) with hot reload
   web:
-    build: .
+    image: ghcr.io/johnbasrai/cr8s/rust-dev:1.83.0-rev5
     ports:
       - "8080:80"
     volumes:            # hot-reload mounts
       - ./src:/app/src
+      - ./Cargo.toml:/app/Cargo.toml
+      - ./Cargo.lock:/app/Cargo.lock
       - ./index.html:/app/index.html
       - ./style.scss:/app/style.scss
+      - ./yew-logo.svg:/app/yew-logo.svg
+    depends_on:
+      server:
+        condition: service_healthy
+    environment:
+      - BACKEND_URL=http://server:8000
+      - ROCKET_HOST=server
+      - ROCKET_PORT=8000
     command: ["trunk","serve","--address","0.0.0.0","--port","80","--open=false"]
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost"]
-      interval: 5s
-      retries: 5

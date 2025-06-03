@@ -1,3 +1,0 @@
-# cr8s-fe/docs/backend-version.txt
-cr8s version: v0.3.0
-Verified E2E: 2025-05-14
