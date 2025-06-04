@@ -37,7 +37,7 @@ Open <http://localhost:8080>; edits you make in `src/**` will hot‑reload in ~1
 To stop all services and remove containers and volumes:
 
 > ```
-> ./scripts/shutdown.sh
+> ./scripts/quickstart.sh --shutdown
 > ```
 > Note: this also removes database volumes — login data will be reset.
 
