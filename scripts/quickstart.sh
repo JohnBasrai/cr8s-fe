@@ -3,8 +3,14 @@
 
 set -euo pipefail
 
-# Source environment variables
-source .env
+# cr8s-fe environment variables
+
+# Version of cr8s backend server container no 'v' prefix
+export CR8S_VERSION=0.4.6
+
+# Rust toolchain version to use
+export RUST_DEV_IMAGE_VERSION=1.83.0-rev5
+export RUST_DEV_IMAGE="ghcr.io/johnbasrai/cr8s/rust-dev:${RUST_DEV_IMAGE_VERSION}"
 
 if [[ "${CR8S_VERSION}" == 'latest' ]] ; then
     export CLI_IMAGE=cr8s-cli-dev:latest
@@ -13,10 +19,15 @@ else
     export CLI_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
     export BASE_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
 fi
-# Export variables for docker compose
-export CR8S_VERSION CLI_IMAGE BASE_IMAGE
+
 progname=$(basename $0)
-echo "${progname}: 🔍 DEBUG: CR8S_VERSION=${CR8S_VERSION}, BASE_IMAGE=${BASE_IMAGE}, CLI_IMAGE=${CLI_IMAGE}"
+echo "${progname}: 🔍 DEBUG:
+    CR8S_VERSION=${CR8S_VERSION},
+    BASE_IMAGE=${BASE_IMAGE},
+    CLI_IMAGE=${CLI_IMAGE}
+    RUST_DEV_IMAGE_VERSION=${RUST_DEV_IMAGE_VERSION}
+    RUST_DEV_IMAGE=${RUST_DEV_IMAGE}
+"
 
 # Parse command line arguments
 LINT_MODE="basic"  # Default mode
@@ -127,30 +138,31 @@ case $LINT_MODE in
         ;;
 esac
 
+# Force pull base images if requested
+RUST_DEV_COMMAND="docker run --rm -i -w$PWD -v$PWD:$PWD ${RUST_DEV_IMAGE}"
+if [[ "$FORCE_PULL_BASE" == "true" ]]; then
+    echo "${progname}: 🔄 Force pulling base image from registry..."
+    docker pull "${RUST_DEV_IMAGE}"
+fi
+
 # Run lint checks based on mode
 if [[ "$LINT_MODE" != "none" ]]; then
     echo "${progname}: ✍️  Checking code formatting..."
-    docker compose run --rm web cargo fmt --all -- --check
+    ${RUST_DEV_COMMAND} cargo fmt --all -- --check
 
     echo "${progname}: 🔎 Running clippy lints..."
-    docker compose run --rm web cargo clippy --workspace --all-targets -- -D warnings
+    ${RUST_DEV_COMMAND} cargo clippy --workspace --all-targets -- -D warnings
 
     # Additional checks only with --full-lint
     if [[ "$LINT_MODE" == "full" ]]; then
         echo "${progname}: 🔒 Running security audit..."
-        docker compose run --rm web cargo audit --ignore RUSTSEC-2023-0071 || true
+        ${RUST_DEV_COMMAND} web cargo audit --ignore RUSTSEC-2023-0071 || true
         
         echo "${progname}: 📦 Checking for outdated dependencies..."
-        docker compose run --rm web cargo outdated || true
+        ${RUST_DEV_COMMAND} cargo outdated || true
     fi
 
     echo "${progname}: ✅ Lint checks passed!"
-fi
-
-# Force pull base images if requested
-if [[ "$FORCE_PULL_BASE" == "true" ]]; then
-    echo "${progname}: 🔄 Force pulling base image from registry..."
-    docker pull ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
 fi
 
 echo "${progname}: 🔨 Building server ..."
