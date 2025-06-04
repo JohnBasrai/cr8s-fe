@@ -104,6 +104,23 @@ while [[ "$#" -gt 0 ]]; do
             show_help
             exit 0
             ;;
+        -h|--help)
+            echo "Usage: $0 ${USAGE_MSG}"
+            echo ""
+            echo "Lint options:"
+            echo "  --no-lint       Skip all lint checks for fast startup"
+            echo "  --full-lint     Run comprehensive lint checks (fmt + clippy + audit + outdated)"
+            echo ""
+            echo "Build options:"
+            echo "  --no-cache      Force rebuild server without Docker cache (local images only)"
+            echo "  --force-pull    Force pull base images from registry before building"
+            echo "  --force-rebuild Force recreate all containers (keep cache)"
+            echo "  --fresh         Nuclear option: stop containers + no-cache + force-pull + force-recreate"
+            echo ""
+            echo "Debug options:"
+            echo "  --verbose       Enable debug logging and verbose output"
+            exit 0
+            ;;
         *)
             echo "${progname}: Unknown option: $1"
             echo "${USAGE_MSG}"
@@ -225,7 +242,6 @@ docker compose up --wait
 if [ ! -f scripts/sql/db-init.sql ] ; then
     if [ "${CR8S_VERSION}" == latest ] ; then
        echo "${progname}: $0: Manually copy cr8s/scripts/sql/db-init.sql cr8s-fe/scripts/sql/db-init.sql"
-
     fi
     CR8S_URL=https://codeload.github.com/JohnBasrai/cr8s/tar.gz/v${CR8S_VERSION}
     curl --fail --silent --show-error --location --output - $CR8S_URL |
