@@ -125,18 +125,21 @@ if [[ "${CR8S_VERSION}" == 'latest' ]] ; then
     echo "🔨 Building server with local dev image..."
     export CLI_IMAGE=cr8s-cli-dev:latest
     export BASE_IMAGE=cr8s-server-dev:latest
-    docker build $BUILD_ARGS \
-        --build-arg BASE_IMAGE=${BASE_IMAGE} \
-        --build-arg CR8S_VERSION=${CR8S_VERSION} \
-        -f Dockerfile.server \
-        -t cr8s-fe-server:latest \
-        .
 else
     export CLI_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
     export BASE_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
     echo "🔨 Building server with latest code..."
-    docker compose build --pull=true server
 fi
+
+echo "🔍 DEBUG: CR8S_VERSION=${CR8S_VERSION}, BASE_IMAGE=${BASE_IMAGE}, CLI_IMAGE=${CLI_IMAGE}"
+
+docker build $BUILD_ARGS \
+    --build-arg BASE_IMAGE=${BASE_IMAGE} \
+    --build-arg CR8S_VERSION=${CR8S_VERSION} \
+    -f Dockerfile.server \
+    -t cr8s-fe-server:latest \
+    .
+
 
 # Start all services
 echo "📦 Starting backend and frontend services..."

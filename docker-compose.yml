@@ -26,14 +26,6 @@ services:
 
   # Backend server (cr8s)
   server:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
-      pull: false  # Don't try to pull the base image - use local
-      args:
-        - CR8S_VERSION=${CR8S_VERSION}
-        - BASE_IMAGE=${BASE_IMAGE}
-
     working_dir: /app
     entrypoint: []  # Clear the existing entrypoint
     command: [ "sh", "-c", "./server ${SERVER_DEBUG_ARGS:-}" ]
