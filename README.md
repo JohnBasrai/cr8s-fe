@@ -22,7 +22,7 @@ Built with ⚡ hot‑reload via Trunk, stateful components, and a clean Tailwind
 > ```
 
 This launches the full stack:
- - Starts PostgreSQL, Redis, and cr8s backend (v0.4.3)
+ - Starts PostgreSQL, Redis, and cr8s backend (v0.4.4)
  - Loads database schema and default roles
  - Creates test user: `admin@example.com` / `password123` (with admin, editor, viewer roles)
  - Launches the frontend with hot reload on http://localhost:8080
@@ -74,7 +74,7 @@ docker compose logs server   # backend logs
 ```
 
 **Configuration:**
-- Backend version controlled by `.env` file (currently v0.4.3)
+- Backend version controlled by `.env` file (currently v0.4.4)
 - Frontend source code mounted for hot reload development
 - Database persists between restarts (until `shutdown.sh` runs)
 

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.2] - 2025-06-03
+
+### Changed
+- **BREAKING**: Updated to cr8s backend v0.4.4 from v0.4.3
+- Fixes editor authorization issues - create/edit operations now work correctly
+
+### Fixed
+- Resolved 403 Forbidden errors when creating rustaceans and crates
+- Restored full editor functionality through authorization fix in backend
+
+---
+
 ## [0.2.1] - 2025-06-02
 
 ### Added

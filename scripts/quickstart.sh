@@ -10,6 +10,11 @@ source .env
 
 # Parse command line arguments
 LINT_MODE="basic"  # Default mode
+BUILD_ARGS=""      # Docker build arguments
+COMPOSE_ARGS=""    # Docker compose up arguments
+FORCE_PULL_BASE=false  # Whether to force pull base images
+
+USAGE_MSG="[--no-lint | --full-lint] [--no-cache | --force-pull | --force-rebuild | --fresh] [--verbose]"
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -19,21 +24,63 @@ while [[ "$#" -gt 0 ]]; do
         --full-lint)
             LINT_MODE="full"
             ;;
+        --no-cache)
+            BUILD_ARGS="--no-cache"
+            echo "🔥 Force rebuilding server without Docker cache..."
+            ;;
+        --force-pull)
+            FORCE_PULL_BASE=true
+            echo "🔄 Will force pull base images from registry..."
+            ;;
+        --force-rebuild)
+            COMPOSE_ARGS="--force-recreate"
+            echo "🔄 Force recreating all containers..."
+            ;;
+        --fresh)
+            echo "🔥 Fresh build: stopping containers and rebuilding everything..."
+            docker compose down
+            BUILD_ARGS="--no-cache"
+            COMPOSE_ARGS="--force-recreate"
+            FORCE_PULL_BASE=true
+            ;;
         --verbose)
             set -x
             LOGLEVEL=debug
+            SERVER_DEBUG_ARGS="--dump-state-traits --check"
+            export SERVER_DEBUG_ARGS
+            export RUST_LOG=debug
             typeset -x LOG=echo
             typeset -x RUST_LOG=debug
             typeset -x DEBUG_MODE=yes
             ;;
+        -h|--help)
+            echo "Usage: $0 ${USAGE_MSG}"
+            echo ""
+            echo "Lint options:"
+            echo "  --no-lint       Skip all lint checks for fast startup"
+            echo "  --full-lint     Run comprehensive lint checks (fmt + clippy + audit + outdated)"
+            echo ""
+            echo "Build options:"
+            echo "  --no-cache      Force rebuild server without Docker cache (local images only)"
+            echo "  --force-pull    Force pull base images from registry before building"
+            echo "  --force-rebuild Force recreate all containers (keep cache)"
+            echo "  --fresh         Nuclear option: stop containers + no-cache + force-pull + force-recreate"
+            echo ""
+            echo "Debug options:"
+            echo "  --verbose       Enable debug logging and verbose output"
+            exit 0
+            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [--no-lint|--full-lint] [--verbose]"
+            echo "Usage: $0 ${USAGE_MSG}"
+            echo "Run '$0 --help' for detailed options."
             exit 1
             ;;
     esac
     shift
 done
+
+: ${CR8S_VERSION:?is required, check .env}
 
 # Display lint mode
 case $LINT_MODE in
@@ -68,26 +115,54 @@ if [[ "$LINT_MODE" != "none" ]]; then
     echo "✅ Lint checks passed!"
 fi
 
-echo "🔨 Building server with latest code..."
-docker compose build server
+# Force pull base images if requested
+if [[ "$FORCE_PULL_BASE" == "true" ]]; then
+    echo "🔄 Force pulling base image from registry..."
+    docker pull ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
+fi
+
+if [[ "${CR8S_VERSION}" == 'latest' ]] ; then
+    echo "🔨 Building server with local dev image..."
+    export CLI_IMAGE=cr8s-cli-dev:latest
+    export BASE_IMAGE=cr8s-server-dev:latest
+    docker build $BUILD_ARGS \
+        --build-arg BASE_IMAGE=${BASE_IMAGE} \
+        --build-arg CR8S_VERSION=${CR8S_VERSION} \
+        -f Dockerfile.server \
+        -t cr8s-fe-server:latest \
+        .
+else
+    export CLI_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
+    export BASE_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
+    echo "🔨 Building server with latest code..."
+    docker compose build --pull=true server
+fi
 
 # Start all services
 echo "📦 Starting backend and frontend services..."
-docker compose up -d
+docker compose up -d $COMPOSE_ARGS
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to be ready..."
 docker compose up --wait
 
 # Extract database schema
-echo "🗄️  Loading database schema..."
-CR8S_URL=https://codeload.github.com/JohnBasrai/cr8s/tar.gz/v${CR8S_VERSION}
-curl --fail --silent --show-error --location --output - $CR8S_URL |
-  tar xfvz - cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql
+if [ ! -f scripts/sql/db-init.sql ] ; then
+    if [ "${CR8S_VERSION}" == latest ] ; then
+       echo "$0: Manually copy cr8s/scripts/sql/db-init.sql cr8s-fe/scripts/sql/db-init.sql"
+
+    fi
+    CR8S_URL=https://codeload.github.com/JohnBasrai/cr8s/tar.gz/v${CR8S_VERSION}
+    curl --fail --silent --show-error --location --output - $CR8S_URL |
+        tar xfvz - cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql
+    mkdir -p scripts/sql/
+    mv cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql scripts/sql/db-init.sql
+    rm -rf cr8s-${CR8S_VERSION}
+fi
 
 # Load schema into postgres
-docker compose exec -T postgres psql -U postgres -d cr8s < cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql
-mkdir -p scripts/sql/ ; mv cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql scripts/sql/db-init.sql
+echo "🗄️  Loading database schema..."
+docker compose exec -T postgres psql -U postgres -d cr8s < scripts/sql/db-init.sql
 
 # Insert default roles (Admin, Editor, Viewer)
 echo "👥 Adding default roles..."

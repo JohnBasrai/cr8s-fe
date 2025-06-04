@@ -3,7 +3,7 @@ use gloo_net::Error;
 use serde::Deserialize;
 use serde_json::json;
 
-use super::app_host;
+use super::app_base;
 
 #[derive(Deserialize, Clone, PartialEq)]
 pub struct Crate {
@@ -17,7 +17,7 @@ pub struct Crate {
 }
 
 pub async fn api_crate_show(token: &String, id: i32) -> Result<Crate, Error> {
-    let response = Request::get(&format!("{}/crates/{}", &app_host(), id))
+    let response = Request::get(&format!("{}/crates/{}", &app_base(), id))
         .header("Authorization", &format!("Bearer {}", token))
         .send()
         .await?;
@@ -26,7 +26,7 @@ pub async fn api_crate_show(token: &String, id: i32) -> Result<Crate, Error> {
 }
 
 pub async fn api_crates(token: &String) -> Result<Vec<Crate>, Error> {
-    let response = Request::get(&format!("{}/crates", &app_host()))
+    let response = Request::get(&format!("{}/crates", &app_base()))
         .header("Authorization", &format!("Bearer {}", token))
         .send()
         .await?;
@@ -42,7 +42,7 @@ pub async fn api_crate_create(
     version: String,
     description: String,
 ) -> Result<Crate, Error> {
-    let response = Request::post(&format!("{}/crates", &app_host()))
+    let response = Request::post(&format!("{}/crates", &app_base()))
         .header("Authorization", &format!("Bearer {}", token))
         .header("Accept", "application/json")
         .json(&json!({
@@ -67,7 +67,7 @@ pub async fn api_crate_update(
     version: String,
     description: String,
 ) -> Result<Crate, Error> {
-    let response = Request::put(&format!("{}/crates/{}", &app_host(), id))
+    let response = Request::put(&format!("{}/crates/{}", &app_base(), id))
         .header("Authorization", &format!("Bearer {}", token))
         .json(&json!({
             "name": name,
@@ -83,7 +83,7 @@ pub async fn api_crate_update(
 }
 
 pub async fn api_crate_delete(token: &String, id: i32) -> Result<(), Error> {
-    let _ = Request::delete(&format!("{}/crates/{}", &app_host(), id))
+    let _ = Request::delete(&format!("{}/crates/{}", &app_base(), id))
         .header("Authorization", &format!("Bearer {}", token))
         .send()
         .await?;

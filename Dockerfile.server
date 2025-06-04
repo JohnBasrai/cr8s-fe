@@ -1,5 +1,6 @@
-ARG CR8S_VERSION=0.4.3  # Default value - only used if not overridden
-FROM ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
+ARG BASE_IMAGE="junk"
+ARG CR8S_VERSION="junk"
+FROM ${BASE_IMAGE}
 LABEL cr8s.base.version=${CR8S_VERSION}
 # Install curl for health checks
 USER root
