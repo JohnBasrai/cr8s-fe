@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **BREAKING**: Updated to cr8s backend v0.4.3 from v0.4.2
+- Remove .env, shutdown.sh, use --shutdown flag to quickstart.sh instead
 - Streamlined CI workflow to single `test` job with conditional E2E execution
 - E2E tests now run by default unless explicitly disabled via workflow_dispatch
 - Quickstart script now rebuilds server container to ensure latest code
