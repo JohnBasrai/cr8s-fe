@@ -139,14 +139,28 @@ case $LINT_MODE in
 esac
 
 # Force pull base images if requested
-RUST_DEV_COMMAND="docker run --rm -i -w$PWD -v$PWD:$PWD ${RUST_DEV_IMAGE}"
+RUST_DEV_COMMAND="docker run --rm -i -w$PWD -v$PWD:$PWD --user $(id -u):$(id -g) ${RUST_DEV_IMAGE}"
 if [[ "$FORCE_PULL_BASE" == "true" ]]; then
     echo "${progname}: 🔄 Force pulling base image from registry..."
-    docker pull "${RUST_DEV_IMAGE}"
+    docker pull "${BASE_IMAGE}"
 fi
 
 set -x
-${RUST_DEV_COMMAND} pwd ; ls -la ; id
+    docker pull "${RUST_DEV_IMAGE}"
+    ${RUST_DEV_COMMAND} pwd ; ls -la ; id
+    echo "${progname}: 🔍 Testing write permissions..."
+    ${RUST_DEV_COMMAND} touch test-write-permission
+    ${RUST_DEV_COMMAND} ls -la test-write-permission
+    ${RUST_DEV_COMMAND} rm -f test-write-permission
+    
+    echo "${progname}: 🔍 Checking target directory..."
+    ${RUST_DEV_COMMAND} mkdir -p target
+    ${RUST_DEV_COMMAND} ls -la target/
+
+    echo "${progname}: 🔍 Disk space check..."
+    df -h
+    ${RUST_DEV_COMMAND} mkdir -p target
+    ${RUST_DEV_COMMAND} chmod 755 target
 set +x
 
 # Run lint checks based on mode
