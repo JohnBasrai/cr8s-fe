@@ -139,13 +139,12 @@ case $LINT_MODE in
 esac
 
 # Force pull base images if requested
-RUST_DEV_COMMAND="docker run --rm -i -e CARGO_HOME=/usr/local/cargo/\
- -w$PWD -v$PWD:$PWD --user $(id -u):$(id -g) ${RUST_DEV_IMAGE}"
-
 if [[ "$FORCE_PULL_BASE" == "true" ]]; then
     echo "${progname}: 🔄 Force pulling base image from registry..."
     docker pull "${BASE_IMAGE}"
 fi
+
+RUST_DEV_COMMAND="docker run --rm -i -w$PWD -v$PWD:$PWD --user $(id -u):$(id -g) ${RUST_DEV_IMAGE}"
 
 set -x
     docker pull "${RUST_DEV_IMAGE}"
