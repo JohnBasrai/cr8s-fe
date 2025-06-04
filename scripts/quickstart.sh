@@ -3,10 +3,20 @@
 
 set -euo pipefail
 
-echo "🚀 Starting cr8s full-stack development environment..."
-
 # Source environment variables
 source .env
+
+if [[ "${CR8S_VERSION}" == 'latest' ]] ; then
+    export CLI_IMAGE=cr8s-cli-dev:latest
+    export BASE_IMAGE=cr8s-server-dev:latest
+else
+    export CLI_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
+    export BASE_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
+fi
+# Export variables for docker compose
+export CR8S_VERSION CLI_IMAGE BASE_IMAGE
+
+echo "🔍 DEBUG: CR8S_VERSION=${CR8S_VERSION}, BASE_IMAGE=${BASE_IMAGE}, CLI_IMAGE=${CLI_IMAGE}"
 
 # Parse command line arguments
 LINT_MODE="basic"  # Default mode
@@ -21,17 +31,6 @@ $0 --shutdown
 
 function do_shutdown() {
     echo "🛑 Shutting down cr8s full-stack..."
-    # Set up same environment variables
-    source .env
-    if [[ "${CR8S_VERSION}" == 'latest' ]]; then
-        export CLI_IMAGE=cr8s-server-dev:latest
-        export BASE_IMAGE=cr8s-server-dev:latest
-    else
-        export CLI_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
-        export BASE_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
-    fi
-    export CR8S_VERSION CLI_IMAGE BASE_IMAGE
-    
     docker compose down -v
     echo "✅ All containers stopped and volumes removed."
     exit 0
@@ -95,9 +94,7 @@ while [[ "$#" -gt 0 ]]; do
             SERVER_DEBUG_ARGS="--dump-state-traits --check"
             export SERVER_DEBUG_ARGS
             export RUST_LOG=debug
-            typeset -x LOG=echo
-            typeset -x RUST_LOG=debug
-            typeset -x DEBUG_MODE=yes
+            export DEBUG_MODE=yes
             ;;
         -h|--help)
             show_help
@@ -112,6 +109,8 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+echo "🚀 Starting cr8s full-stack development environment..."
 
 : ${CR8S_VERSION:?is required, check .env}
 
@@ -154,27 +153,14 @@ if [[ "$FORCE_PULL_BASE" == "true" ]]; then
     docker pull ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
 fi
 
-if [[ "${CR8S_VERSION}" == 'latest' ]] ; then
-    echo "🔨 Building server with local dev image..."
-    export CLI_IMAGE=cr8s-cli-dev:latest
-    export BASE_IMAGE=cr8s-server-dev:latest
-else
-    export CLI_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
-    export BASE_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
-    echo "🔨 Building server with latest code..."
-fi
-
-echo "🔍 DEBUG: CR8S_VERSION=${CR8S_VERSION}, BASE_IMAGE=${BASE_IMAGE}, CLI_IMAGE=${CLI_IMAGE}"
+echo "🔨 Building server ..."
 
 docker build $BUILD_ARGS \
     --build-arg BASE_IMAGE=${BASE_IMAGE} \
     --build-arg CR8S_VERSION=${CR8S_VERSION} \
     -f Dockerfile.server \
-    -t cr8s-fe-server:latest \
+    -t $BASE_IMAGE \
     .
-
-# Export variables for docker compose
-export CR8S_VERSION CLI_IMAGE BASE_IMAGE
 
 # Start all services
 echo "📦 Starting backend and frontend services..."

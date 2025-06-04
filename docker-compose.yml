@@ -26,6 +26,7 @@ services:
 
   # Backend server (cr8s)
   server:
+    image: ${BASE_IMAGE}
     working_dir: /app
     entrypoint: []  # Clear the existing entrypoint
     command: [ "sh", "-c", "./server ${SERVER_DEBUG_ARGS:-}" ]
