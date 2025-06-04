@@ -22,11 +22,11 @@ fi
 
 progname=$(basename $0)
 echo "${progname}: 🔍 DEBUG:
-    CR8S_VERSION=${CR8S_VERSION},
-    BASE_IMAGE=${BASE_IMAGE},
-    CLI_IMAGE=${CLI_IMAGE}
-    RUST_DEV_IMAGE_VERSION=${RUST_DEV_IMAGE_VERSION}
-    RUST_DEV_IMAGE=${RUST_DEV_IMAGE}
+    CR8S_VERSION           : ${CR8S_VERSION}
+    BASE_IMAGE             : ${BASE_IMAGE}
+    CLI_IMAGE              : ${CLI_IMAGE}
+    RUST_DEV_IMAGE_VERSION : ${RUST_DEV_IMAGE_VERSION}
+    RUST_DEV_IMAGE         : ${RUST_DEV_IMAGE}
 "
 
 # Parse command line arguments
@@ -144,6 +144,10 @@ if [[ "$FORCE_PULL_BASE" == "true" ]]; then
     echo "${progname}: 🔄 Force pulling base image from registry..."
     docker pull "${RUST_DEV_IMAGE}"
 fi
+
+set -x
+${RUST_DEV_COMMAND} pwd ; ls -la ; id
+set +x
 
 # Run lint checks based on mode
 if [[ "$LINT_MODE" != "none" ]]; then
