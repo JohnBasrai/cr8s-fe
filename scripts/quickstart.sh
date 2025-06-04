@@ -14,10 +14,56 @@ BUILD_ARGS=""      # Docker build arguments
 COMPOSE_ARGS=""    # Docker compose up arguments
 FORCE_PULL_BASE=false  # Whether to force pull base images
 
-USAGE_MSG="[--no-lint | --full-lint] [--no-cache | --force-pull | --force-rebuild | --fresh] [--verbose]"
+USAGE_MSG="
+$0 [--no-lint | --full-lint] [--no-cache | --force-pull | --force-rebuild | --fresh] [--verbose]
+$0 --shutdown
+"
+
+function do_shutdown() {
+    echo "🛑 Shutting down cr8s full-stack..."
+    # Set up same environment variables
+    source .env
+    if [[ "${CR8S_VERSION}" == 'latest' ]]; then
+        export CLI_IMAGE=cr8s-server-dev:latest
+        export BASE_IMAGE=cr8s-server-dev:latest
+    else
+        export CLI_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
+        export BASE_IMAGE=ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
+    fi
+    export CR8S_VERSION CLI_IMAGE BASE_IMAGE
+    
+    docker compose down -v
+    echo "✅ All containers stopped and volumes removed."
+    exit 0
+}
+
+function show_help() {
+    cat <<__EOF
+${USAGE_MSG}
+
+Lifecycle:
+  --shutdown      Stop all services and remove volumes
+
+Lint options:
+  --no-lint       Skip all lint checks for fast startup
+  --full-lint     Run comprehensive lint checks (fmt + clippy + audit + outdated)
+
+Build options:
+  --no-cache      Force rebuild server without Docker cache (local images only)
+  --force-pull    Force pull base images from registry before building
+  --force-rebuild Force recreate all containers (keep cache)
+  --fresh         Nuclear option: stop containers + no-cache + force-pull + force-recreate
+
+Debug options:
+  --verbose       Enable debug logging and verbose output
+__EOF
+}
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
+        --shutdown)
+            do_shutdown
+            ;;
         --no-lint)
             LINT_MODE="none"
             ;;
@@ -54,25 +100,12 @@ while [[ "$#" -gt 0 ]]; do
             typeset -x DEBUG_MODE=yes
             ;;
         -h|--help)
-            echo "Usage: $0 ${USAGE_MSG}"
-            echo ""
-            echo "Lint options:"
-            echo "  --no-lint       Skip all lint checks for fast startup"
-            echo "  --full-lint     Run comprehensive lint checks (fmt + clippy + audit + outdated)"
-            echo ""
-            echo "Build options:"
-            echo "  --no-cache      Force rebuild server without Docker cache (local images only)"
-            echo "  --force-pull    Force pull base images from registry before building"
-            echo "  --force-rebuild Force recreate all containers (keep cache)"
-            echo "  --fresh         Nuclear option: stop containers + no-cache + force-pull + force-recreate"
-            echo ""
-            echo "Debug options:"
-            echo "  --verbose       Enable debug logging and verbose output"
+            show_help
             exit 0
             ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 ${USAGE_MSG}"
+            echo "${USAGE_MSG}"
             echo "Run '$0 --help' for detailed options."
             exit 1
             ;;
@@ -140,6 +173,8 @@ docker build $BUILD_ARGS \
     -t cr8s-fe-server:latest \
     .
 
+# Export variables for docker compose
+export CR8S_VERSION CLI_IMAGE BASE_IMAGE
 
 # Start all services
 echo "📦 Starting backend and frontend services..."
