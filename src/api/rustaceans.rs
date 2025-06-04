@@ -3,7 +3,7 @@ use gloo_net::Error;
 use serde::Deserialize;
 use serde_json::json;
 
-use super::app_host;
+use super::app_base;
 
 #[derive(Deserialize, Clone, PartialEq)]
 pub struct Rustacean {
@@ -14,7 +14,7 @@ pub struct Rustacean {
 }
 
 pub async fn api_rustaceans(token: &String) -> Result<Vec<Rustacean>, Error> {
-    let response = Request::get(&format!("{}/rustaceans", &app_host()))
+    let response = Request::get(&format!("{}/rustaceans", &app_base()))
         .header("Authorization", &format!("Bearer {}", token))
         .send()
         .await?;
@@ -23,7 +23,7 @@ pub async fn api_rustaceans(token: &String) -> Result<Vec<Rustacean>, Error> {
 }
 
 pub async fn api_rustacean_show(token: &String, id: i32) -> Result<Rustacean, Error> {
-    let response = Request::get(&format!("{}/rustaceans/{}", &app_host(), id))
+    let response = Request::get(&format!("{}/rustaceans/{}", &app_base(), id))
         .header("Authorization", &format!("Bearer {}", token))
         .send()
         .await?;
@@ -36,7 +36,7 @@ pub async fn api_rustacean_create(
     name: String,
     email: String,
 ) -> Result<Rustacean, Error> {
-    let response = Request::post(&format!("{}/rustaceans", &app_host()))
+    let response = Request::post(&format!("{}/rustaceans", &app_base()))
         .header("Authorization", &format!("Bearer {}", token))
         .json(&json!({
             "name": name,
@@ -54,7 +54,7 @@ pub async fn api_rustacean_update(
     name: String,
     email: String,
 ) -> Result<Rustacean, Error> {
-    let response = Request::put(&format!("{}/rustaceans/{}", &app_host(), id))
+    let response = Request::put(&format!("{}/rustaceans/{}", &app_base(), id))
         .header("Authorization", &format!("Bearer {}", token))
         .json(&json!({
             "name": name,
@@ -67,7 +67,7 @@ pub async fn api_rustacean_update(
 }
 
 pub async fn api_rustacean_delete(token: &String, id: i32) -> Result<(), Error> {
-    let _ = Request::delete(&format!("{}/rustaceans/{}", &app_host(), id))
+    let _ = Request::delete(&format!("{}/rustaceans/{}", &app_base(), id))
         .header("Authorization", &format!("Bearer {}", token))
         .send()
         .await?;

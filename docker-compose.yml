@@ -11,7 +11,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
-      timeout: 5s
+      timeout: 30s
       retries: 5
 
   redis:
@@ -21,16 +21,16 @@ services:
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
-      timeout: 5s
+      timeout: 30s
       retries: 5
 
   # Backend server (cr8s)
   server:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
-      args:
-        - CR8S_VERSION=${CR8S_VERSION}
+    image: ${BASE_IMAGE}
+    working_dir: /app
+    entrypoint: []  # Clear the existing entrypoint
+    command: [ "sh", "-c", "./server ${SERVER_DEBUG_ARGS:-}" ]
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -41,17 +41,18 @@ services:
       DATABASE_URL: postgres://postgres:secret@postgres:5432/cr8s
       REDIS_URL: redis://redis:6379/
       RUST_BACKTRACE: 1
+      RUST_LOG: ${RUST_LOG:-info}
     ports:
       - "8000:8000"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/cr8s/health || exit 1"]
       interval: 10s
-      timeout: 5s
+      timeout: 30s
       retries: 5
 
   # CLI tool (optional, for admin tasks)
   cli:
-    image: ghcr.io/johnbasrai/cr8s/cr8s-cli:${CR8S_VERSION}
+    image: ${CLI_IMAGE}
     depends_on:
       postgres:
         condition: service_healthy

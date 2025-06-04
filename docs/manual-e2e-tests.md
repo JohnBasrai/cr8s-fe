@@ -4,6 +4,7 @@ This document describes how to run Playwright-based end-to-end tests against the
 
 ## ✅ Prerequisites
 
+- **No local Node.js or Rust required**: All tooling runs in containers
 - Docker and Docker Compose v2 must be installed and running
 - Services running via `./scripts/quickstart.sh`
 
@@ -59,16 +60,20 @@ To reset the test environment between test runs:
 
 ## 🚀 CI Integration
 
-E2E tests now run by default in the CI pipeline. The CI workflow:
+E2E tests now run by default in the CI pipeline with improved performance:
 
-1. Runs `quickstart.sh --full-lint` for comprehensive code quality checks
-2. Executes Playwright login tests across all browsers
-3. Uploads test artifacts on failure for debugging
+1. **Fast execution**: Complete CI pipeline runs in under 4 minutes
+2. Runs `quickstart.sh --full-lint` for comprehensive code quality checks
+3. Executes Playwright login tests across all browsers
+4. Uploads test artifacts on failure for debugging
+5. **Optimized permissions**: Automatic user permission handling across environments
 
 To disable E2E tests in CI, use `workflow_dispatch` with `run_e2e=false`.
 
 ## Notes
 
+- **Cross-platform compatibility**: The quickstart script automatically handles user permissions on different systems (local development vs CI runners)
+- **Performance optimized**: Container operations streamlined for faster test execution
 - The quickstart script now includes enhanced user role setup for comprehensive testing
 - Default test user has all three roles (admin, editor, viewer) to test role-based features
 - SQL schema files are automatically managed in `scripts/sql/` directory

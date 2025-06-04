@@ -12,6 +12,7 @@ Built with ⚡ hot‑reload via Trunk, stateful components, and a clean Tailwind
 * **Docker ≥ 24** & Docker Compose v2
 
 > **No local Rust installation required!** Everything runs in containers with the pre-built development image.
+> **Note**: The development environment automatically handles user permissions across different systems (local dev, CI, contributors) using containerized tooling.
 
 ---
 
@@ -22,7 +23,7 @@ Built with ⚡ hot‑reload via Trunk, stateful components, and a clean Tailwind
 > ```
 
 This launches the full stack:
- - Starts PostgreSQL, Redis, and cr8s backend (v0.4.3)
+ - Starts PostgreSQL, Redis, and cr8s backend (v0.4.6)
  - Loads database schema and default roles
  - Creates test user: `admin@example.com` / `password123` (with admin, editor, viewer roles)
  - Launches the frontend with hot reload on http://localhost:8080
@@ -45,36 +46,29 @@ To stop all services and remove containers and volumes:
 **Common development tasks:**
 
 ```bash
-# Start development environment (with basic lint checks)
-./scripts/quickstart.sh
+# Usage message for quickstart.sh
+./scripts/quickstart.sh [--no-lint | --full-lint] [--no-cache | --force-pull | --force-rebuild | --fresh] [--verbose]
+./scripts/quickstart.sh --shutdown
 
-# Fast startup (skip all lint checks)
-./scripts/quickstart.sh --no-lint
+Lifecycle:
+  --shutdown      Stop all services and remove volumes
 
-# Comprehensive startup (includes security audit & outdated deps)
-./scripts/quickstart.sh --full-lint
+Lint options:
+  --no-lint       Skip all lint checks for fast startup
+  --full-lint     Run comprehensive lint checks (fmt + clippy + audit + outdated)
 
-# Verbose debugging mode
-./scripts/quickstart.sh --verbose
+Build options:
+  --no-cache      Force rebuild server without Docker cache (local images only)
+  --force-pull    Force pull base images from registry before building
+  --force-rebuild Force recreate all containers (keep cache)
+  --fresh         Nuclear option: stop containers + no-cache + force-pull + force-recreate
 
-# Run cargo commands in frontend container
-docker compose exec web cargo check
-docker compose exec web cargo test
-
-# Use backend CLI tools
-docker compose run --rm cli list-users
-docker compose run --rm cli create-user user@example.com password123 viewer
-
-# View logs
-docker compose logs web      # frontend logs
-docker compose logs server   # backend logs
-
-# Stop everything and clean up
-./scripts/shutdown.sh
+Debug options:
+  --verbose       Enable debug logging and verbose output
 ```
 
 **Configuration:**
-- Backend version controlled by `.env` file (currently v0.4.3)
+- Backend version controlled by `.env` file (currently v0.4.6)
 - Frontend source code mounted for hot reload development
 - Database persists between restarts (until `shutdown.sh` runs)
 
@@ -142,6 +136,7 @@ E2E tests run by default in CI. To run them manually see the full instructions i
 
 Every push & PR runs **quickstart → lint checks → build → E2E tests** via
 `.github/workflows/ci.yml`. The CI includes configurable lint levels and comprehensive testing across multiple browsers.
+> ⚡ **Performance**: CI builds complete in under 4 minutes with optimized container operations and streamlined permission handling.
 
 ---
 
@@ -149,7 +144,6 @@ Every push & PR runs **quickstart → lint checks → build → E2E tests** via
 
 ```
 cr8s-fe/
-├── .env                        # Backend version configuration
 ├── Cargo.toml
 ├── README.md
 ├── CHANGELOG.md
@@ -158,8 +152,7 @@ cr8s-fe/
 ├── public/
 │   └── index.html              # App entrypoint
 ├── scripts/
-│   ├── quickstart.sh           # One-command dev startup (backend + frontend)
-│   └── shutdown.sh             # Stops all containers and removes volumes
+│   └── quickstart.sh           # One-command dev startup (backend + frontend)
 ├── src/
 │   ├── api/                    # REST/GraphQL helpers
 │   ├── components/             # Reusable Yew components
