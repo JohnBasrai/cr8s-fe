@@ -11,7 +11,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
-      timeout: 5s
+      timeout: 30s
       retries: 5
 
   redis:
@@ -21,19 +21,12 @@ services:
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
-      timeout: 5s
+      timeout: 30s
       retries: 5
 
   # Backend server (cr8s)
   server:
-    build:
-      context: .
-      dockerfile: Dockerfile.server
-      pull: false  # Don't try to pull the base image - use local
-      args:
-        - CR8S_VERSION=${CR8S_VERSION}
-        - BASE_IMAGE=${BASE_IMAGE}
-
+    image: ${BASE_IMAGE}
     working_dir: /app
     entrypoint: []  # Clear the existing entrypoint
     command: [ "sh", "-c", "./server ${SERVER_DEBUG_ARGS:-}" ]
@@ -54,7 +47,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8000/cr8s/health || exit 1"]
       interval: 10s
-      timeout: 5s
+      timeout: 30s
       retries: 5
 
   # CLI tool (optional, for admin tasks)
