@@ -21,13 +21,6 @@ else
 fi
 
 progname=$(basename $0)
-echo "${progname}: 🔍 DEBUG:
-    CR8S_VERSION           : ${CR8S_VERSION}
-    BASE_IMAGE             : ${BASE_IMAGE}
-    CLI_IMAGE              : ${CLI_IMAGE}
-    RUST_DEV_IMAGE_VERSION : ${RUST_DEV_IMAGE_VERSION}
-    RUST_DEV_IMAGE         : ${RUST_DEV_IMAGE}
-"
 
 # Parse command line arguments
 LINT_MODE="basic"  # Default mode
@@ -101,11 +94,11 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --verbose)
             set -x
-            LOGLEVEL=debug
-            SERVER_DEBUG_ARGS="--dump-state-traits --check"
+            export LOGLEVEL=debug
+            export SERVER_DEBUG_ARGS="--dump-state-traits --check"
             export SERVER_DEBUG_ARGS
             export RUST_LOG=debug
-            export DEBUG_MODE=yes
+            export DEBUG_MODE=true
             ;;
         -h|--help)
             show_help
@@ -120,6 +113,16 @@ while [[ "$#" -gt 0 ]]; do
     esac
     shift
 done
+
+if [ "${CI:-}" == true -o "${DEBUG_MODE:-}" == true ] ; then
+    echo "${progname}: 🔍 DEBUG:
+    CR8S_VERSION           : ${CR8S_VERSION}
+    BASE_IMAGE             : ${BASE_IMAGE}
+    CLI_IMAGE              : ${CLI_IMAGE}
+    RUST_DEV_IMAGE_VERSION : ${RUST_DEV_IMAGE_VERSION}
+    RUST_DEV_IMAGE         : ${RUST_DEV_IMAGE}
+"
+fi
 
 echo "${progname}: 🚀 Starting cr8s full-stack development environment..."
 
@@ -151,6 +154,7 @@ else
 fi
 RUST_DEV_COMMAND="docker run --rm -i -w$PWD -v$PWD:$PWD $USER ${RUST_DEV_IMAGE}"
 
+if false ; then
 set -x
     docker pull "${RUST_DEV_IMAGE}"
     ${RUST_DEV_COMMAND} pwd ; ls -la ; id
@@ -168,6 +172,7 @@ set -x
     ${RUST_DEV_COMMAND} mkdir -p target
     ${RUST_DEV_COMMAND} chmod 755 target
 set +x
+fi
 
 # Run lint checks based on mode
 if [[ "$LINT_MODE" != "none" ]]; then
