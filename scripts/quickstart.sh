@@ -15,8 +15,8 @@ else
 fi
 # Export variables for docker compose
 export CR8S_VERSION CLI_IMAGE BASE_IMAGE
-
-echo "🔍 DEBUG: CR8S_VERSION=${CR8S_VERSION}, BASE_IMAGE=${BASE_IMAGE}, CLI_IMAGE=${CLI_IMAGE}"
+progname=$(basename $0)
+echo "${progname}: 🔍 DEBUG: CR8S_VERSION=${CR8S_VERSION}, BASE_IMAGE=${BASE_IMAGE}, CLI_IMAGE=${CLI_IMAGE}"
 
 # Parse command line arguments
 LINT_MODE="basic"  # Default mode
@@ -30,9 +30,9 @@ $0 --shutdown
 "
 
 function do_shutdown() {
-    echo "🛑 Shutting down cr8s full-stack..."
+    echo "${progname}: 🛑 Shutting down cr8s full-stack..."
     docker compose down -v
-    echo "✅ All containers stopped and volumes removed."
+    echo "${progname}: ✅ All containers stopped and volumes removed."
     exit 0
 }
 
@@ -71,18 +71,18 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         --no-cache)
             BUILD_ARGS="--no-cache"
-            echo "🔥 Force rebuilding server without Docker cache..."
+            echo "${progname}: 🔥 Force rebuilding server without Docker cache..."
             ;;
         --force-pull)
             FORCE_PULL_BASE=true
-            echo "🔄 Will force pull base images from registry..."
+            echo "${progname}: 🔄 Will force pull base images from registry..."
             ;;
         --force-rebuild)
             COMPOSE_ARGS="--force-recreate"
-            echo "🔄 Force recreating all containers..."
+            echo "${progname}: 🔄 Force recreating all containers..."
             ;;
         --fresh)
-            echo "🔥 Fresh build: stopping containers and rebuilding everything..."
+            echo "${progname}: 🔥 Fresh build: stopping containers and rebuilding everything..."
             docker compose down
             BUILD_ARGS="--no-cache"
             COMPOSE_ARGS="--force-recreate"
@@ -101,7 +101,7 @@ while [[ "$#" -gt 0 ]]; do
             exit 0
             ;;
         *)
-            echo "Unknown option: $1"
+            echo "${progname}: Unknown option: $1"
             echo "${USAGE_MSG}"
             echo "Run '$0 --help' for detailed options."
             exit 1
@@ -110,50 +110,50 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-echo "🚀 Starting cr8s full-stack development environment..."
+echo "${progname}: 🚀 Starting cr8s full-stack development environment..."
 
 : ${CR8S_VERSION:?is required, check .env}
 
 # Display lint mode
 case $LINT_MODE in
     none)
-        echo "⚡ Skipping lint checks for fast startup..."
+        echo "${progname}: ⚡ Skipping lint checks for fast startup..."
         ;;
     full)
-        echo "🔍 Running FULL lint checks (fmt + clippy + audit + outdated)..."
+        echo "${progname}: 🔍 Running FULL lint checks (fmt + clippy + audit + outdated)..."
         ;;
     basic)
-        echo "🔍 Running basic lint checks (fmt + clippy)..."
+        echo "${progname}: 🔍 Running basic lint checks (fmt + clippy)..."
         ;;
 esac
 
 # Run lint checks based on mode
 if [[ "$LINT_MODE" != "none" ]]; then
-    echo "  ✍️  Checking code formatting..."
+    echo "${progname}: ✍️  Checking code formatting..."
     docker compose run --rm web cargo fmt --all -- --check
 
-    echo "  🔎 Running clippy lints..."
+    echo "${progname}: 🔎 Running clippy lints..."
     docker compose run --rm web cargo clippy --workspace --all-targets -- -D warnings
 
     # Additional checks only with --full-lint
     if [[ "$LINT_MODE" == "full" ]]; then
-        echo "  🔒 Running security audit..."
+        echo "${progname}: 🔒 Running security audit..."
         docker compose run --rm web cargo audit --ignore RUSTSEC-2023-0071 || true
         
-        echo "  📦 Checking for outdated dependencies..."
+        echo "${progname}: 📦 Checking for outdated dependencies..."
         docker compose run --rm web cargo outdated || true
     fi
 
-    echo "✅ Lint checks passed!"
+    echo "${progname}: ✅ Lint checks passed!"
 fi
 
 # Force pull base images if requested
 if [[ "$FORCE_PULL_BASE" == "true" ]]; then
-    echo "🔄 Force pulling base image from registry..."
+    echo "${progname}: 🔄 Force pulling base image from registry..."
     docker pull ghcr.io/johnbasrai/cr8s/cr8s-server:${CR8S_VERSION}
 fi
 
-echo "🔨 Building server ..."
+echo "${progname}: 🔨 Building server ..."
 
 docker build $BUILD_ARGS \
     --build-arg BASE_IMAGE=${BASE_IMAGE} \
@@ -163,17 +163,27 @@ docker build $BUILD_ARGS \
     .
 
 # Start all services
-echo "📦 Starting backend and frontend services..."
+echo "${progname}: 📦 Starting backend and frontend services..."
 docker compose up -d $COMPOSE_ARGS
+echo "${progname}: 🔍 Manual server connectivity test..."
+for i in {1..12}; do
+    if curl -sf http://localhost:8000/cr8s/health; then
+        echo "${progname}: ✅ Server is responding on attempt $i"
+        break
+    else
+        echo "${progname}: ⏳ Server not ready on attempt $i, waiting 10s..."
+        sleep 10
+    fi
+done
 
 # Wait for services to be healthy
-echo "⏳ Waiting for services to be ready..."
+echo "${progname}: ⏳ Waiting for services to be ready..."
 docker compose up --wait
 
 # Extract database schema
 if [ ! -f scripts/sql/db-init.sql ] ; then
     if [ "${CR8S_VERSION}" == latest ] ; then
-       echo "$0: Manually copy cr8s/scripts/sql/db-init.sql cr8s-fe/scripts/sql/db-init.sql"
+       echo "${progname}: $0: Manually copy cr8s/scripts/sql/db-init.sql cr8s-fe/scripts/sql/db-init.sql"
 
     fi
     CR8S_URL=https://codeload.github.com/JohnBasrai/cr8s/tar.gz/v${CR8S_VERSION}
@@ -185,11 +195,11 @@ if [ ! -f scripts/sql/db-init.sql ] ; then
 fi
 
 # Load schema into postgres
-echo "🗄️  Loading database schema..."
+echo "${progname}: 🗄️  Loading database schema..."
 docker compose exec -T postgres psql -U postgres -d cr8s < scripts/sql/db-init.sql
 
 # Insert default roles (Admin, Editor, Viewer)
-echo "👥 Adding default roles..."
+echo "${progname}: 👥 Adding default roles..."
 docker compose exec -T postgres psql -U postgres -d cr8s << 'EOF'
 INSERT INTO role (code, name) VALUES 
   ('Admin', 'Admin'),
@@ -200,25 +210,25 @@ EOF
 
 # Seed default test user
 # CLI user creation should fail if it doesn't work
-echo "👤 Creating default test user (admin@example.com)..."
+echo "${progname}: 👤 Creating default test user (admin@example.com)..."
 if ! docker compose run --rm cli create-user \
        --username admin@example.com \
        --password password123 \
        --roles admin,editor,viewer; then
-    echo "❌ FATAL: Failed to create test user"
+    echo "${progname}: ❌ FATAL: Failed to create test user"
     exit 1
 fi
 
 # Verify user was actually created
-echo "🔍 Verifying test user creation..."
+echo "${progname}: 🔍 Verifying test user creation..."
 USER_COUNT=$(docker compose exec postgres psql -U postgres -d cr8s -t -c \
     "SELECT COUNT(*) FROM app_user WHERE username = 'admin@example.com';")
 
 if [ "${USER_COUNT// /}" != "1" ]; then
-    echo "❌ FATAL: Test user was not created successfully"
-    echo "Expected 1 user, found: ${USER_COUNT// /}"
+    echo "${progname}: ❌ FATAL: Test user was not created successfully"
+    echo "${progname}: Expected 1 user, found: ${USER_COUNT// /}"
     exit 1
 fi
 
-echo "✅ Quickstart complete! Open http://localhost:8080"
-echo "📧 Test login: admin@example.com / password123"
+echo "${progname}: ✅ Quickstart complete! Open http://localhost:8080"
+echo "${progname}: 📧 Test login: admin@example.com / password123"
