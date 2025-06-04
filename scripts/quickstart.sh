@@ -144,7 +144,12 @@ if [[ "$FORCE_PULL_BASE" == "true" ]]; then
     docker pull "${BASE_IMAGE}"
 fi
 
-RUST_DEV_COMMAND="docker run --rm -i -w$PWD -v$PWD:$PWD --user $(id -u):$(id -g) ${RUST_DEV_IMAGE}"
+if [ $(id -u) == 1000 ] ; then
+    USER=""
+else
+    USER="--user root"
+fi
+RUST_DEV_COMMAND="docker run --rm -i -w$PWD -v$PWD:$PWD $USER ${RUST_DEV_IMAGE}"
 
 set -x
     docker pull "${RUST_DEV_IMAGE}"
