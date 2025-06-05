@@ -206,7 +206,7 @@ if [[ "$LINT_MODE" != "none" ]]; then
     # Additional checks only with --full-lint
     if [[ "$LINT_MODE" == "full" ]]; then
         echo "${progname}: 🔒 Running security audit..."
-        ${RUST_DEV_COMMAND} web cargo audit --ignore RUSTSEC-2023-0071 || true
+        ${RUST_DEV_COMMAND} cargo audit --ignore RUSTSEC-2023-0071 || true
         
         echo "${progname}: 📦 Checking for outdated dependencies..."
         ${RUST_DEV_COMMAND} cargo outdated || true
