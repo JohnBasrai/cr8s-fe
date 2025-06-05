@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.3] - 2025-06-05
+
+### Added
+- ✅ Added Playwright E2E test for `rustaceans.spec.ts` to GitHub Actions workflow
+- 📝 Documented manual E2E testing updates in `manual-e2e-tests.md`
+
+### Changed
+- 🚧 Skipped flaky `crates.spec.ts` test (see cr8s-fe#35) in CI workflow with clear log message
+- 🔄 Updated `quickstart.sh` to use new `load-schema` CLI command from cr8s v0.4.7
+- 🛠 Switched to backend image version `v0.4.7` (set `USE_DEV_CONTAINER=true` for local dev builds)
+
+### Fixed
+- Minor doc clarifications and CI consistency fixes for better test reliability
+
 ## [v0.2.2] - 2025-06-03
 
 ### Changed

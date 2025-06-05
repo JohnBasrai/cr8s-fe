@@ -7,6 +7,7 @@ This document describes how to run Playwright-based end-to-end tests against the
 - **No local Node.js or Rust required**: All tooling runs in containers
 - Docker and Docker Compose v2 must be installed and running
 - Services running via `./scripts/quickstart.sh`
+- Run it with `--help` to get latest usage message. 
 
 ## 🚀 Running E2E Tests
 
@@ -46,8 +47,8 @@ To visually observe test execution in a real browser window:
 To reset the test environment between test runs:
 
 > ```bash
-> ./scripts/shutdown.sh
-> ./scripts/quickstart.sh
+> ./scripts/quickstart.sh ...
+> ./scripts/quickstart.sh --shutdown
 > ```
 
 > ⚠️ This will erase your local database (including seeded data).

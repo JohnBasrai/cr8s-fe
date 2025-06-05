@@ -5,8 +5,12 @@ set -euo pipefail
 
 # cr8s-fe environment variables
 
-# Version of cr8s backend server container no 'v' prefix
-export CR8S_VERSION=0.4.6
+if [ "${USE_DEV_CONTAINER:-}" == true ] ; then
+    export CR8S_VERSION=latest
+else
+    # Version of cr8s backend server container no 'v' prefix
+    export CR8S_VERSION=0.4.7
+fi
 
 # Rust toolchain version to use
 export RUST_DEV_IMAGE_VERSION=1.83.0-rev5
@@ -238,37 +242,14 @@ done
 echo "${progname}: ⏳ Waiting for services to be ready..."
 docker compose up --wait
 
-# Extract database schema
-if [ ! -f scripts/sql/db-init.sql ] ; then
-    if [ "${CR8S_VERSION}" == latest ] ; then
-       echo "${progname}: $0: Manually copy cr8s/scripts/sql/db-init.sql cr8s-fe/scripts/sql/db-init.sql"
-    fi
-    CR8S_URL=https://codeload.github.com/JohnBasrai/cr8s/tar.gz/v${CR8S_VERSION}
-    curl --fail --silent --show-error --location --output - $CR8S_URL |
-        tar xfvz - cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql
-    mkdir -p scripts/sql/
-    mv cr8s-${CR8S_VERSION}/scripts/sql/db-init.sql scripts/sql/db-init.sql
-    rm -rf cr8s-${CR8S_VERSION}
-fi
-
 # Load schema into postgres
 echo "${progname}: 🗄️  Loading database schema..."
-docker compose exec -T postgres psql -U postgres -d cr8s < scripts/sql/db-init.sql
-
-# Insert default roles (Admin, Editor, Viewer)
-echo "${progname}: 👥 Adding default roles..."
-docker compose exec -T postgres psql -U postgres -d cr8s << 'EOF'
-INSERT INTO role (code, name) VALUES 
-  ('Admin', 'Admin'),
-  ('Editor', 'Editor'), 
-  ('Viewer', 'Viewer')
-ON CONFLICT (code) DO NOTHING;
-EOF
+docker compose run -q --rm cli load-schema
 
 # Seed default test user
 # CLI user creation should fail if it doesn't work
 echo "${progname}: 👤 Creating default test user (admin@example.com)..."
-if ! docker compose run --rm cli create-user \
+if ! docker compose run -q --rm cli create-user \
        --username admin@example.com \
        --password password123 \
        --roles admin,editor,viewer; then
