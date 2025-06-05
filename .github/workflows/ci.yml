@@ -60,7 +60,7 @@ jobs:
       - name: 🧪 Run rustaceans Playwright test
         run: npx playwright test tests/playwright/rustaceans.spec.ts
 
-      - name: 🧪 "SKIPPED: crates Playwright test (see cr8s-fe#35)"
+      - name: "🧪 SKIPPED: crates Playwright test (see cr8s-fe issue 35)"
         run: echo 'crates.spec.ts skipped due to known issue (cr8s-fe#35)'
 
       - name: 📋 Upload test results on failure
