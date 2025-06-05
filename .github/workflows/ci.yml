@@ -53,10 +53,16 @@ jobs:
       - name: ⏳ Wait for frontend to be ready
         run: npx wait-on http://localhost:8080 --timeout 60000
 
-      - name: ✅ Run Playwright E2E tests (login only)
+      - name: ✅ Run login Playwright test
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         run: npx playwright test tests/playwright/login.spec.ts
-        
+
+      - name: 🧪 Run rustaceans Playwright test
+        run: npx playwright test tests/playwright/rustaceans.spec.ts
+
+      - name: "🧪 SKIPPED: crates Playwright test (see cr8s-fe issue 35)"
+        run: echo 'crates.spec.ts skipped due to known issue (cr8s-fe#35)'
+
       - name: 📋 Upload test results on failure
         uses: actions/upload-artifact@v4
         if: failure()
