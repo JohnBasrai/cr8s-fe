@@ -50,6 +50,9 @@ jobs:
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         run: npx playwright install --with-deps
 
+      - name: 🚀 Run quickstart to wait for fronend ready
+        run: ./scripts/quickstart.sh --wait
+
       - name: ✅ Run login Playwright test
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         run: npx playwright test tests/playwright/login.spec.ts

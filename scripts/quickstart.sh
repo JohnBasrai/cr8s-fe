@@ -27,14 +27,16 @@ fi
 progname=$(basename $0)
 
 # Parse command line arguments
-LINT_MODE="basic"  # Default mode
-BUILD_ARGS=""      # Docker build arguments
-COMPOSE_ARGS=""    # Docker compose up arguments
-FORCE_PULL_BASE=false  # Whether to force pull base images
+LINT_MODE="basic"     # Default mode
+BUILD_ARGS=""         # Docker build arguments
+COMPOSE_ARGS=""       # Docker compose up arguments
+FORCE_PULL_BASE=false # Whether to force pull base images
+
 
 USAGE_MSG="
 $0 [--no-lint | --full-lint] [--no-cache | --force-pull | --force-rebuild | --fresh] [--verbose]
 $0 --shutdown
+$0 --wait       # Waits until frontend is ready (trunk compile complete)
 "
 
 function do_shutdown() {
@@ -44,12 +46,43 @@ function do_shutdown() {
     exit 0
 }
 
+function wait_for_frontend() {
+
+    # --
+
+    echo "${progname}: ⏳ Waiting for frontend to be ready..."
+
+    if ! command -v npx >/dev/null 2>&1; then
+        echo "${progname}: ❌ npx not found. Please install Node.js first."
+        exit 1
+    fi
+
+    if npx wait-on http://localhost:8080 \
+           --timeout 120000 \
+           --interval 2000  \
+           --delay 1000     \
+           --window 1000    \
+           --verbose;
+    then
+        echo "${progname}: ✅ Frontend is ready!"
+        exit 0
+    else
+        echo "${progname}: ❌ Frontend failed to start within timeout"
+        echo "${progname}: 🔍 Container logs:"
+        docker compose logs web --tail 30
+        echo "${progname}: 🔍 Container status:"
+        docker compose ps
+        exit 1
+    fi
+}
+
 function show_help() {
     cat <<__EOF
 ${USAGE_MSG}
 
 Lifecycle:
   --shutdown      Stop all services and remove volumes
+  --wait          Wait until frontend is ready (does not do startup)
 
 Lint options:
   --no-lint       Skip all lint checks for fast startup
@@ -68,6 +101,9 @@ __EOF
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
+        --wait)
+            wait_for_frontend
+            ;;
         --shutdown)
             do_shutdown
             ;;
@@ -103,6 +139,7 @@ while [[ "$#" -gt 0 ]]; do
             export SERVER_DEBUG_ARGS
             export RUST_LOG=debug
             export DEBUG_MODE=true
+            verbose_flag="--verbose"
             ;;
         -h|--help)
             show_help
@@ -166,7 +203,7 @@ set -x
     ${RUST_DEV_COMMAND} touch test-write-permission
     ${RUST_DEV_COMMAND} ls -la test-write-permission
     ${RUST_DEV_COMMAND} rm -f test-write-permission
-    
+
     echo "${progname}: 🔍 Checking target directory..."
     ${RUST_DEV_COMMAND} mkdir -p target
     ${RUST_DEV_COMMAND} ls -la target/
@@ -190,7 +227,7 @@ if [[ "$LINT_MODE" != "none" ]]; then
     if [[ "$LINT_MODE" == "full" ]]; then
         echo "${progname}: 🔒 Running security audit..."
         ${RUST_DEV_COMMAND} cargo audit --ignore RUSTSEC-2023-0071 || true
-        
+
         echo "${progname}: 📦 Checking for outdated dependencies..."
         ${RUST_DEV_COMMAND} cargo outdated || true
     fi
