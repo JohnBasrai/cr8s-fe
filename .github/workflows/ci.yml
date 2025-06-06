@@ -50,9 +50,6 @@ jobs:
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         run: npx playwright install --with-deps
 
-      - name: ⏳ Wait for frontend to be ready
-        run: npx wait-on http://localhost:8080 --timeout 60000
-
       - name: ✅ Run login Playwright test
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         run: npx playwright test tests/playwright/login.spec.ts
