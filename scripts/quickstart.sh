@@ -9,7 +9,7 @@ if [ "${USE_DEV_CONTAINER:-}" == true ] ; then
     export CR8S_VERSION=latest
 else
     # Version of cr8s backend server container no 'v' prefix
-    export CR8S_VERSION=0.4.7
+    export CR8S_VERSION=0.5.1
 fi
 
 # Rust toolchain version to use
@@ -106,23 +106,6 @@ while [[ "$#" -gt 0 ]]; do
             ;;
         -h|--help)
             show_help
-            exit 0
-            ;;
-        -h|--help)
-            echo "Usage: $0 ${USAGE_MSG}"
-            echo ""
-            echo "Lint options:"
-            echo "  --no-lint       Skip all lint checks for fast startup"
-            echo "  --full-lint     Run comprehensive lint checks (fmt + clippy + audit + outdated)"
-            echo ""
-            echo "Build options:"
-            echo "  --no-cache      Force rebuild server without Docker cache (local images only)"
-            echo "  --force-pull    Force pull base images from registry before building"
-            echo "  --force-rebuild Force recreate all containers (keep cache)"
-            echo "  --fresh         Nuclear option: stop containers + no-cache + force-pull + force-recreate"
-            echo ""
-            echo "Debug options:"
-            echo "  --verbose       Enable debug logging and verbose output"
             exit 0
             ;;
         *)

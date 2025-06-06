@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.4] - 2025-06-06
+
+### Changed
+- 🔄 Updated to `cr8s` backend v0.5.1
+
+### Fixed
+- Deleted duplicate usage message in quickstart.sh
+
 ## [v0.2.3] - 2025-06-05
 
 ### Added
 - ✅ Added Playwright E2E test for `rustaceans.spec.ts` to GitHub Actions workflow
-- 📝 Documented manual E2E testing updates in `manual-e2e-tests.md`
 
 ### Changed
 - 🚧 Skipped flaky `crates.spec.ts` test (see cr8s-fe#35) in CI workflow with clear log message
