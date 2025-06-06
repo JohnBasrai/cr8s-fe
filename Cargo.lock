@@ -89,7 +89,7 @@ dependencies = [
 
 [[package]]
 name = "cr8s-fe"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "console_error_panic_hook",
  "gloo-console 0.2.3",
