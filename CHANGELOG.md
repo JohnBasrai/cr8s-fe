@@ -7,30 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.3.1] – 2025-06-09
+
+### Added
+
+- 💡 Clarified usage of container vs host `quickstart` binary in `manual-e2e-tests.md`
+- 📝 Documented `CR8S_SCRATCH_DIR` in Docker Compose volumes
+- 🧪 Documented `cargo install` method for CLI usability on host
+- 📄 `Dockerfile.fe-server` now enforces required build args with early failure
+- 🧼 Expanded `quickstart shutdown` doc to explain dev volume cleanup
+
+### Changed
+
+- 📚 Simplified frontend startup instructions in docs; clarified Trunk role and port 8080
+- 🐳 Docker Compose now respects `${CR8S_SCRATCH_DIR:-/var/tmp}` for frontend caching
+- 🧪 Replaced `target/debug/quickstart` with `quickstart` in all doc examples
+- ✅ Reworded CI integration section to match current `quickstart` usage
+
+### Fixed
+
+- 🧪 CI flake in WebKit Playwright test: added `waitForNavigation()` and fallback logging
+
 ## [v0.3.0] – 2025-06-08
 
 ### Added
 
-* 📝 Added new documentation: `Dev-container-usage.md` for containerized development, linting, and volume mounts
-* 🚀 **New Rust-based CLI tool**: `quickstart` binary fully replaces `scripts/quickstart.sh`
-
-  * Supports subcommands: `start`, `shutdown`, and `wait`
-  * Supports flags: `--lint`, `--dry-run`, `--fresh`, `--dev`, and more
-  * Leverages `clap`, `tracing`, and container-based linting with dynamic script generation
-* 🪵 Structured logging via `tracing` with configurable `--log-level`
-* 🧪 Full CI integration with `target/debug/quickstart` used in place of shell script
-* 🧹 Auto-cleanup of `/tmp/dev-*` volumes via `--shutdown`
+- 🚀 **New Rust-based CLI tool**: `quickstart` binary replaces `scripts/quickstart.sh`
+  - Supports: `start`, `shutdown`, `wait` subcommands
+  - Flags: `--lint`, `--dry-run`, `--fresh`, `--dev`, etc.
+  - Uses `clap`, `tracing`, and dynamic shell script generation for linting
+- 📝 `dev-container-usage.md`: containerized dev environment, linting, and volume caching
+- 🪵 Structured logging via `tracing` with configurable log level
+- 🧪 CI pipeline updated to run all lint/tests via `quickstart`
 
 ### Changed
 
-* 🐳 All Docker Compose image variables moved to explicit `FE_SERVER_IMAGE`, `BE_SERVER_IMAGE`, etc., improving environment clarity
-* 📄 `Dockerfile.fe-server` now tagged independently of BE and uses consistent `dev` user
+- 🐳 Docker Compose now uses `FE_SERVER_IMAGE`, `BE_SERVER_IMAGE`, etc. for clarity
+- 📄 `Dockerfile.fe-server` accepts `CR8S_VERSION` and `FE_BASE_IMAGE` with validation
+- 📁 `target/debug/quickstart` is now the default entry for all local and CI workflows
 
 ### Removed
 
-* ❌ Legacy `scripts/quickstart.sh` deleted after confirming parity with Rust implementation
-
----
+- ❌ `scripts/quickstart.sh` removed after confirming full parity with Rust CLI
 
 ## [v0.2.4] - 2025-06-06
 

@@ -13,29 +13,51 @@ This document describes how to run Playwright-based end-to-end tests against the
 
 Ensure services are running first. Choose your preferred startup mode:
 
+💡 **Note:** If you're running `quickstart` via the container-based workflow, the CLI binary is built inside the dev container under:
+
+```bash
+${CR8S_SCRATCH_DIR:-/tmp/tmp}/dev-target/debug/quickstart
+```
+
+This is a temporary path and will be deleted when you run:
+
+```bash
+quickstart shutdown
+```
+
+To avoid this and run `quickstart` consistently from your host:
+
+```bash
+cargo install --path cli --bin quickstart
+```
+
+This installs it to `$CARGO_HOME/bin` (usually `~/.cargo/bin`), so you can run it from anywhere like:
+
 > ```bash
-> # Standard startup with basic lint checks (recommended for testing)
-> target/debug/quickstart start --fresh --lint medium
+> # Recommended for testing
+> quickstart start --fresh --lint basic
 > 
 > # Fast startup for quick test iterations
-> target/debug/quickstart start --fresh --lint none
+> quickstart start --fresh --lint none
 > 
-> # Comprehensive startup with full lint suite
-> target/debug/quickstart start --fresh --lint full
+> # Comprehensive startup with full lint suite (used by CI workflow)
+> quickstart start --fresh --lint full
 > ```
 
-Ater you start the service you the first you should wait the frontend finish initializing
+After you start the service the first time, you should wait for the frontend to finish initializing. This gives **Trunk**, the Rust/WASM bundler, time to compile the frontend code in `cr8s-fe/src` and serve it on port `8080`.
+
+Use the following command:
 >```
-> target/debug/quickstart wait
+> quickstart wait
 >```
 
-Then run Playwright tests across Chromium, Firefox, and WebKit:
-
+Once `quickstart wait` returns, run Playwright tests across Chromium, Firefox, and WebKit:
 > ```bash
 > npx playwright test tests/playwright/login.spec.ts
 > npx playwright test tests/playwright/rustaceans.spec.ts
-> npx playwright test tests/playwright/crates.spec.ts
+> npx playwright test tests/playwright/crates.spec.ts # Currently not working*
 > ```
+* See [Issue #35](https://github.com/JohnBasrai/cr8s/issues/35)
 
 ## 🧪 Running Tests in Headed Mode
 
@@ -52,10 +74,10 @@ To visually observe test execution in a real browser window:
 To reset the test environment between test runs:
 
 > ```bash
-> target/debug/quickstart shutdown
+> quickstart shutdown
 > ```
 
-> ⚠️ This will erase your local database (including seeded data).
+> ⚠️ This will erase your local database (including seeded data) and also deletes scratch volumes under `${CR8S_SCRATCH_DIR}` (e.g., `/var/tmp/dev-target`, `/var/tmp/dev-cargo`).
 
 ## 📧 Test Credentials
 
@@ -68,7 +90,7 @@ To reset the test environment between test runs:
 E2E tests now run by default in the CI pipeline with improved performance:
 
 1. **Fast execution**: Complete CI pipeline runs in under 4 minutes
-2. Runs `quickstart.sh --full-lint` for comprehensive code quality checks
+2. Runs `quickstart start --lint full` for comprehensive code quality checks
 3. Executes Playwright login tests across all browsers
 4. Uploads test artifacts on failure for debugging
 5. **Optimized permissions**: Automatic user permission handling across environments
@@ -85,5 +107,5 @@ To disable E2E tests in CI, use `workflow_dispatch` with `run_e2e=false`.
 - Container rebuilds ensure latest code changes are reflected in tests
 
 ## Bugs
-
-> 📝 Note: See [Issue #10](https://github.com/JohnBasrai/cr8s-fe/issues/10) for details on why `npx playwright test` is currently avoided in favor of running each test file directly.
+> 📝 See [Issue #10](https://github.com/JohnBasrai/cr8s-fe/issues/10) for details on why `npx playwright test` is currently avoided in favor of running each test file directly.
+> 📝 See [Issue #35](https://github.com/JohnBasrai/cr8s/issues/35) for details on why `crates.spec.ts` playwright test is disabled.
