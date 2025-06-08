@@ -19,11 +19,12 @@ Built with ⚡ hot‑reload via Trunk, stateful components, and a clean Tailwind
 ## Quick Start  
 
 > ```bash
-> ./scripts/quickstart.sh
+> cargo build -p quickstart
+> target/debug/quickstart start --lint basic
 > ```
 
 This launches the full stack:
- - Starts PostgreSQL, Redis, and cr8s backend (v0.4.6)
+ - Starts PostgreSQL, Redis, and cr8s backend
  - Loads database schema and default roles
  - Creates test user: `admin@example.com` / `password123` (with admin, editor, viewer roles)
  - Launches the frontend with hot reload on http://localhost:8080
@@ -37,14 +38,22 @@ Open <http://localhost:8080>; edits you make in `src/**` will hot‑reload in ~1
 To stop all services and remove containers and volumes:
 
 > ```
-> ./scripts/quickstart.sh --shutdown
+> target/debug/quickstart shutdown
 > ```
 > Note: this also removes database volumes — login data will be reset.
+> for volume mounts, CI integration, and multi-service workflow.
+> 💡 Prefer Docker? See [dev-container-usage.md](docs/dev-container-usage.md)  
 
 ### Development Workflow
 
 **Configuration:**
-- Backend version is controlled by `cli/src/quickstart.sh`, search for CR8S_VERSION in this file to see current version.
+- Backend version is controlled by `cli/src/main.rs`, search for CR8S_VERSION in this file to see current version.
+> ```
+> fn get_cr8s_version() -> String {
+>     // This is the version of cr8s BE that we are targeting.
+>     get_env_with_default("CR8S_VERSION", "0.5.1")
+> }
+```
 - See [dev-container-usage.md](docs/dev-container-usage.md) for up-to-date instructions on using the containerized development environment. This includes lint checks, image builds, volume reuse, and CI integration.
 - Frontend source code mounted for hot reload development
 - Database persists between restarts (until `shutdown.sh` runs)
