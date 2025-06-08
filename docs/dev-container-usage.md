@@ -65,8 +65,8 @@ CI workflow can use:
 
 To speed up builds and avoid permission errors:
 
-- `/app/target` → `${CR8S_SCRATCH_DIR:-/tmp/tmp}/dev-target`
-- `/usr/local/cargo/registry` → `${CR8S_SCRATCH_DIR:-/tmp/tmp}/dev-cargo`
+- `/app/target` → `${CR8S_SCRATCH_DIR:-/var/tmp}/dev-target`
+- `/usr/local/cargo/registry` → `${CR8S_SCRATCH_DIR:-/var/tmp}/dev-cargo`
 
 These volumes are reused across container runs and cleaned up via:
 
@@ -77,7 +77,7 @@ docker compose down -v
 sudo rm -rf "$CR8S_SCRATCH_DIR/dev-target" "$CR8S_SCRATCH_DIR/dev-cargo"
 ```
 
-✅ As of **v0.3.0**, both `quickstart` and `docker-compose.yml` now default to the same scratch path fallback: `/tmp/tmp`. When `CR8S_SCRATCH_DIR` is set, all tooling — including Compose volume mounts — will respect this value for consistent cross-environment behavior.
+✅ As of **v0.3.0**, both `quickstart` and `docker-compose.yml` now default to the same scratch path fallback: `/var/tmp`. When `CR8S_SCRATCH_DIR` is set, all tooling — including Compose volume mounts — will respect this value for consistent cross-environment behavior.
 
 
 ## Frontend Compilation and Playwright
