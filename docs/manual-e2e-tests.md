@@ -6,8 +6,8 @@ This document describes how to run Playwright-based end-to-end tests against the
 
 - **No local Node.js or Rust required**: All tooling runs in containers
 - Docker and Docker Compose v2 must be installed and running
-- Services running via `./scripts/quickstart.sh`
-- Run it with `--help` to get latest usage message. 
+- Services running via `target/debug/quickstart start`
+👉 Run `quickstart --help` and `quickstart start --help` for the most up-to-date usage instructions.
 
 ## 🚀 Running E2E Tests
 
@@ -15,14 +15,19 @@ Ensure services are running first. Choose your preferred startup mode:
 
 > ```bash
 > # Standard startup with basic lint checks (recommended for testing)
-> ./scripts/quickstart.sh
+> target/debug/quickstart start --fresh --lint medium
 > 
 > # Fast startup for quick test iterations
-> ./scripts/quickstart.sh --no-lint
+> target/debug/quickstart start --fresh --lint none
 > 
 > # Comprehensive startup with full lint suite
-> ./scripts/quickstart.sh --full-lint
+> target/debug/quickstart start --fresh --lint full
 > ```
+
+Ater you start the service you the first you should wait the frontend finish initializing
+>```
+> target/debug/quickstart wait
+>```
 
 Then run Playwright tests across Chromium, Firefox, and WebKit:
 
@@ -47,8 +52,7 @@ To visually observe test execution in a real browser window:
 To reset the test environment between test runs:
 
 > ```bash
-> ./scripts/quickstart.sh ...
-> ./scripts/quickstart.sh --shutdown
+> target/debug/quickstart shutdown
 > ```
 
 > ⚠️ This will erase your local database (including seeded data).

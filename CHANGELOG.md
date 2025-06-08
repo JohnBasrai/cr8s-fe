@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.3.0] – 2025-06-08
+
+### Added
+
+* 📝 Added new documentation: `Dev-container-usage.md` for containerized development, linting, and volume mounts
+* 🚀 **New Rust-based CLI tool**: `quickstart` binary fully replaces `scripts/quickstart.sh`
+
+  * Supports subcommands: `start`, `shutdown`, and `wait`
+  * Supports flags: `--lint`, `--dry-run`, `--fresh`, `--dev`, and more
+  * Leverages `clap`, `tracing`, and container-based linting with dynamic script generation
+* 🪵 Structured logging via `tracing` with configurable `--log-level`
+* 🧪 Full CI integration with `target/debug/quickstart` used in place of shell script
+* 🧹 Auto-cleanup of `/tmp/dev-*` volumes via `--shutdown`
+
+### Changed
+
+* 🐳 All Docker Compose image variables moved to explicit `FE_SERVER_IMAGE`, `BE_SERVER_IMAGE`, etc., improving environment clarity
+* 📄 `Dockerfile.fe-server` now tagged independently of BE and uses consistent `dev` user
+
+### Removed
+
+* ❌ Legacy `scripts/quickstart.sh` deleted after confirming parity with Rust implementation
+
+---
+
 ## [v0.2.4] - 2025-06-06
 
 ### Changed
