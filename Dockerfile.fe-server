@@ -1,10 +1,23 @@
-# This dockerfile builds a frontend server image with default name 'cr8s-fe-server'
-ARG FE_BASE_IMAGE="junk"
-ARG CR8S_VERSION="junk"
+# Dockerfile.fe-server
+# ---------------------
+# Builds the frontend server image, typically named 'cr8s-fe-server'.
+# This Dockerfile is invoked by `quickstart start` to launch the dev or test stack.
+#
+# Required build arguments (must be overridden by caller):
+# - FE_BASE_IMAGE: base image containing the built frontend app
+# - CR8S_VERSION: version label for diagnostics/logging
+#
+ARG FE_BASE_IMAGE="not set"      # Must be overridden
+ARG CR8S_VERSION="not set"       # Must be overridden
+
 FROM ${FE_BASE_IMAGE}
-# Install curl for health checks
+
+# Install curl (used by health check probes)
 USER root
-RUN echo "Building server version ${CR8S_VERSION}" ; \
-    apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN test "$FE_BASE_IMAGE" != "not set" && \
+    test "$CR8S_VERSION"  != "not set" && \
+    echo "Building server version ${CR8S_VERSION}" && \
+    apt-get update && apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
 
 USER dev

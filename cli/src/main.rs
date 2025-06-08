@@ -14,7 +14,7 @@ use tracing_subscriber::EnvFilter;
 #[derive(Parser)]
 #[command(name = "quickstart", version, about = "Start or stop cr8s services")]
 struct Cli {
-    /// Override log level (e.g. error, warn, info, debug, trace)
+    /// Override log level
     #[arg(long, value_enum)]
     log_level: Option<LogLevel>,
 
@@ -22,7 +22,7 @@ struct Cli {
     #[arg(long)]
     dry_run: bool,
 
-    /// Developer mode (base image from local docker registery)
+    /// Developer mode (uses cr8s-server-dev from local docker registery)
     #[arg(long)]
     dev: bool,
 
