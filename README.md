@@ -53,7 +53,7 @@ To stop all services and remove containers and volumes:
 >     // This is the version of cr8s BE that we are targeting.
 >     get_env_with_default("CR8S_VERSION", "0.5.1")
 > }
-```
+> ```
 - See [dev-container-usage.md](docs/dev-container-usage.md) for up-to-date instructions on using the containerized development environment. This includes lint checks, image builds, volume reuse, and CI integration.
 - Frontend source code mounted for hot reload development
 - Database persists between restarts (until `shutdown.sh` runs)
