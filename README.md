@@ -43,32 +43,9 @@ To stop all services and remove containers and volumes:
 
 ### Development Workflow
 
-**Common development tasks:**
-
-```bash
-# Usage message for quickstart.sh
-./scripts/quickstart.sh [--no-lint | --full-lint] [--no-cache | --force-pull | --force-rebuild | --fresh] [--verbose]
-./scripts/quickstart.sh --shutdown
-
-Lifecycle:
-  --shutdown      Stop all services and remove volumes
-
-Lint options:
-  --no-lint       Skip all lint checks for fast startup
-  --full-lint     Run comprehensive lint checks (fmt + clippy + audit + outdated)
-
-Build options:
-  --no-cache      Force rebuild server without Docker cache (local images only)
-  --force-pull    Force pull base images from registry before building
-  --force-rebuild Force recreate all containers (keep cache)
-  --fresh         Nuclear option: stop containers + no-cache + force-pull + force-recreate
-
-Debug options:
-  --verbose       Enable debug logging and verbose output
-```
-
 **Configuration:**
-- Backend version controlled by `scripts/quickstart.sh` (e.g. v0.4.6)
+- Backend version is controlled by `cli/src/quickstart.sh`, search for CR8S_VERSION in this file to see current version.
+- See [dev-container-usage.md](docs/dev-container-usage.md) for up-to-date instructions on using the containerized development environment. This includes lint checks, image builds, volume reuse, and CI integration.
 - Frontend source code mounted for hot reload development
 - Database persists between restarts (until `shutdown.sh` runs)
 
@@ -175,6 +152,12 @@ cr8s-fe/
 | **[cr8s](https://github.com/JohnBasrai/cr8s)**                          | Rocket + Postgres backend that powers this UI               |
 | **[axum-quickstart](https://github.com/JohnBasrai/axum-quickstart)**   | Production-ready REST API using Axum, Redis, and Tokio      |
 | **[rust-sqlx](https://github.com/JohnBasrai/rust-sqlx)**               | Async Postgres examples leveraging SQLx enum mapping        |
+
+---
+
+## Development
+
+See [`Dev-container-usage.md`](./Dev-container-usage.md) for full details on container-based development, including linting, volume mounts, and usage of the `quickstart` CLI.
 
 ---
 

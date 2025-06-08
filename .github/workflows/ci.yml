@@ -30,12 +30,21 @@ jobs:
       - name: 🐳 Log in to GitHub Container Registry
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      #- name: 🐳 Pre-pull base image to cache credentials
-      #  run: docker pull ghcr.io/johnbasrai/cr8s/cr8s-server:0.4.3
+      - name: Build quickstart cli binary
+        env:
+          CR8S_SCRATCH_DIR: ${{ runner.temp }}/cr8s-scratch
+        run: |
+          docker run --rm -u root -v "$PWD:$PWD" \
+               -v "${CR8S_SCRATCH_DIR}/dev-target/dev-target:/app/target" \
+               -v "${CR8S_SCRATCH_DIR}/dev-cargo/dev-cargo:/usr/local/cargo/registry" \
+               -w "$PWD" ghcr.io/johnbasrai/cr8s/rust-dev:1.83.0-rev5 \
+               cargo build --release -p quickstart
 
       - name: 🚀 Run quickstart with full lint checks
-        run: ./scripts/quickstart.sh --full-lint
-        
+        env:
+          CR8S_SCRATCH_DIR: ${{ runner.temp }}/cr8s-scratch
+        run: target/release/quickstart start --lint full
+
       - name: 🧰 Set up Node.js for Playwright
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         uses: actions/setup-node@v4
@@ -50,8 +59,10 @@ jobs:
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
         run: npx playwright install --with-deps
 
-      - name: 🚀 Run quickstart to wait for fronend ready
-        run: ./scripts/quickstart.sh --wait
+      - name: 🚀 Run quickstart to wait for fronend ready before running tests
+        env:
+          CR8S_SCRATCH_DIR: ${{ runner.temp }}/cr8s-scratch
+        run: target/release/quickstart wait --timeout 120
 
       - name: ✅ Run login Playwright test
         if: github.event.inputs.run_e2e == 'true' || github.event_name != 'workflow_dispatch'
@@ -62,6 +73,11 @@ jobs:
 
       - name: "🧪 SKIPPED: crates Playwright test (see cr8s-fe issue 35)"
         run: echo 'crates.spec.ts skipped due to known issue (cr8s-fe#35)'
+
+      - name: 🚀 Stop all containers and clean up
+        env:
+          CR8S_SCRATCH_DIR: ${{ runner.temp }}/cr8s-scratch
+        run: target/release/quickstart shutdown
 
       - name: 📋 Upload test results on failure
         uses: actions/upload-artifact@v4

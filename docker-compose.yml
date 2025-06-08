@@ -26,7 +26,7 @@ services:
 
   # Backend server (cr8s)
   server:
-    image: ${BASE_IMAGE}
+    image: ${BE_SERVER_IMAGE:-} # Required
     working_dir: /app
     entrypoint: []  # Clear the existing entrypoint
     command: [ "sh", "-c", "./server ${SERVER_DEBUG_ARGS:-}" ]
@@ -52,7 +52,7 @@ services:
 
   # CLI tool (optional, for admin tasks)
   cli:
-    image: ${CLI_IMAGE}
+    image: ${BE_CLI_IMAGE:-}    # Required
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,16 +66,20 @@ services:
 
   # Frontend (cr8s-fe) with hot reload
   web:
-    image: ghcr.io/johnbasrai/cr8s/rust-dev:1.83.0-rev5
+    user: root
+    image: ${FE_SERVER_IMAGE:-} # Required
     ports:
       - "8080:80"
     volumes:            # hot-reload mounts
       - ./src:/app/src
+      - ./cli:/app/cli
       - ./Cargo.toml:/app/Cargo.toml
       - ./Cargo.lock:/app/Cargo.lock
       - ./index.html:/app/index.html
       - ./style.scss:/app/style.scss
       - ./yew-logo.svg:/app/yew-logo.svg
+      - /var/tmp/dev-cargo:/usr/local/cargo/registry
+      - /var/tmp/dev-target:/app/target
     depends_on:
       server:
         condition: service_healthy
