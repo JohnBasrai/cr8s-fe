@@ -16,7 +16,7 @@ Ensure services are running first. Choose your preferred startup mode:
 💡 **Note:** If you're running `quickstart` via the container-based workflow, the CLI binary is built inside the dev container under:
 
 ```bash
-${CR8S_SCRATCH_DIR:-/tmp/tmp}/dev-target/debug/quickstart
+${CR8S_SCRATCH_DIR:-/var/tmp}/dev-target/debug/quickstart
 ```
 
 This is a temporary path and will be deleted when you run:

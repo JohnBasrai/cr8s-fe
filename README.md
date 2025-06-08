@@ -133,12 +133,14 @@ cr8s-fe/
 ├── Cargo.toml
 ├── README.md
 ├── CHANGELOG.md
+├── cli
+│   ├── Cargo.toml
+│   └── src
+│       └── main.rs
 ├── docs/
+│   ├── dev-container-usage.md
 │   └── manual-e2e-tests.md     # E2E instructions for local dev
-├── public/
-│   └── index.html              # App entrypoint
-├── scripts/
-│   └── quickstart.sh           # One-command dev startup (backend + frontend)
+├── index.html                  # App entrypoint
 ├── src/
 │   ├── api/                    # REST/GraphQL helpers
 │   ├── components/             # Reusable Yew components
@@ -149,6 +151,7 @@ cr8s-fe/
 ├── style.scss
 ├── tests/
 │   └── playwright/             # E2E browser tests (Playwright)
+├── Dockerfile.fe-server        # Dockerfile to build cr8s-fe-server
 └── docker-compose.yml          # Full-stack container definition
 ```
 
