@@ -2,6 +2,8 @@
 name = "cr8s-fe"
 version = "0.3.1"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Yew/WebAssembly frontend for cr8s. Supports crate release workflows, session auth, and cross-platform CI automation"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
