@@ -18,6 +18,9 @@ Built with ⚡ hot‑reload via Trunk, stateful components, and a clean Tailwind
 
 ## Quick Start  
 
+Before running the container, ensure you are authenticated with GitHub Container Registry.  
+See [Docker Login with PAT](Dockerlogin.md) for instructions on creating a GitHub Personal Access Token (PAT) and logging in to `ghcr.io`.
+
 > ```bash
 > cargo build -p quickstart
 > target/debug/quickstart start --lint basic
