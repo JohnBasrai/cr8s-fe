@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dual-license metadata (MIT OR Apache-2.0) added to manifest and README
 - LICENSE-MIT and LICENSE-APACHE files included in repo
 
+### Changed
+- Updated README prerequisites to require Rust 1.88.0 or newer alongside Docker
+- Removed note about no local Rust installation being required
+
 ## [v0.3.1] – 2025-06-09
 
 ### Added

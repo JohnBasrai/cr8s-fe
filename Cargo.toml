@@ -1,6 +1,6 @@
 [package]
 name = "cr8s-fe"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Yew/WebAssembly frontend for cr8s. Supports crate release workflows, session auth, and cross-platform CI automation"

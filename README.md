@@ -9,9 +9,8 @@ Built with ⚡ hot‑reload via Trunk, stateful components, and a clean Tailwind
 
 ## Prerequisites
 
-* **Docker ≥ 24** & Docker Compose v2
+* **Docker ≥ 24** & Docker Compose v2, Rust 1.88.0 or newer
 
-> **No local Rust installation required!** Everything runs in containers with the pre-built development image.
 > **Note**: The development environment automatically handles user permissions across different systems (local dev, CI, contributors) using containerized tooling.
 
 ---
